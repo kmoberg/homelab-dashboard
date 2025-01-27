@@ -18,10 +18,9 @@ import requests
 from flask import Flask, send_from_directory, request, jsonify
 from influxdb_client import InfluxDBClient
 
-# Set application details
-CONTACT_EMAIL = os.getenv("CONTACT_EMAIL")
-APP_NAME = os.getenv("APP_NAME")
-APP_VERSION = os.getenv("APP_VERSION")
+# Get environment variables from .env file
+from dotenv import load_dotenv
+
 
 # Create Flask app
 app = Flask(__name__, static_folder='public', static_url_path='')
@@ -32,17 +31,26 @@ with open('sun_data.json', 'r', encoding='utf-8') as f:
     SUN_DATA = json.load(f)
 
 
+# APP SETUP
+APP_NAME = os.getenv("APP_NAME")
+APP_VERSION = os.getenv("APP_VERSION")
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL")
+
 # ------------------------------------------------------
 # InfluxDB setup
 INFLUX_URL = os.getenv("INFLUX_URL")
-INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
+INFLUX_API_TOKEN = os.getenv("INFLUX_API_TOKEN")
 INFLUX_ORG = os.getenv("INFLUX_ORG")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
+
+# Check if any of the required environment variables are missing or empty, if so kill the app
+if not INFLUX_URL or not INFLUX_API_TOKEN or not INFLUX_ORG or not INFLUX_BUCKET:
+    raise ValueError("Missing InfluxDB environment variables. Please check your environment variables.")
 
 # Create a single InfluxDB client & Query API outside the route for reuse
 influx_client = InfluxDBClient(
     url=INFLUX_URL,
-    token=INFLUX_TOKEN,
+    token=INFLUX_API_TOKEN,
     org=INFLUX_ORG
 )
 query_api = influx_client.query_api()
@@ -68,7 +76,7 @@ def api_weather():
     lat = request.args.get('lat', '58.970052')
     lon = request.args.get('lon', '5.733395')
     url = f"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat}&lon={lon}"
-    CONTACT_EMAIL = os.getenv("CONTACT_EMAIL")
+
     headers = {
         'User-Agent': f'{APP_NAME}/{APP_VERSION} ({CONTACT_EMAIL})',
     }
@@ -116,7 +124,6 @@ def api_weather():
 # ------------------------------------------------------
 @app.route('/api/prices')
 def api_prices():
-    # Default to NO2 region
     region = request.args.get('region', 'NO2')
 
     now = datetime.now()
