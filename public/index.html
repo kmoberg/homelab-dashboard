@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stavanger Homelab Dashboard</title>
+  <!-- Bootstrap Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Local CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Our main JS, loaded with defer so it runs after HTML is parsed -->
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+<header>
+  <h1><i class="bi bi-house-fill"></i> Stavanger Homelab Dashboard</h1>
+  <div class="time-display" id="time">--:--:--</div>
+</header>
+
+<!-- FIRST ROW of cards -->
+<div class="card-container">
+  <!-- Weather Card -->
+  <div class="card" id="weather-card">
+    <h2><i class="bi bi-cloud-sun"></i> Current Weather</h2>
+
+    <!-- Weather icon row: now, next 6h, next 12h -->
+    <div id="symbol-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <div>
+        <strong>Now (1h):</strong>
+        <img id="symbol-1h" class="symbol-img" src="" alt="1h symbol" />
+      </div>
+      <div>
+        <strong>6h:</strong>
+        <img id="symbol-6h" class="symbol-img" src="" alt="6h symbol" />
+      </div>
+      <div>
+        <strong>12h:</strong>
+        <img id="symbol-12h" class="symbol-img" src="" alt="12h symbol" />
+      </div>
+    </div>
+
+    <div class="weather-info">
+      <p>
+        <i class="bi bi-thermometer-half"></i>
+        <strong>Temperature:</strong>
+        <span id="temperature" class="fade">-- °C</span>
+      </p>
+
+      <div class="wind-compass-container">
+        <div class="wind-compass">
+          <div class="compass-arrow" id="wind-arrow"></div>
+          <div class="wind-speed-label" id="wind-speed-value">-- m/s</div>
+          <div class="compass-label compass-n">N</div>
+          <div class="compass-label compass-e">E</div>
+          <div class="compass-label compass-s">S</div>
+          <div class="compass-label compass-w">W</div>
+        </div>
+      </div>
+
+      <p><span hidden="hidden" id="wind-speed"></span></p>
+    </div>
+
+    <hr />
+    <h2><i class="bi bi-calendar-day"></i> Forecast (Next 12h)</h2>
+    <!-- Updated: add fade + custom-table -->
+    <table id="forecast-table" class="fade custom-table">
+      <caption>Stavanger Area</caption>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Temp (°C)</th>
+          <th>Wind (m/s)</th>
+          <th>Precip (mm/h)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <hr />
+    <h2><i class="bi bi-sunrise"></i> Sunrise & Sunset</h2>
+    <div class="sun-info">
+      <p>
+        <i class="bi bi-sunrise-fill"></i>
+        <strong>Sunrise:</strong> <span id="sunrise" class="fade">--:--</span>
+      </p>
+      <p>
+        <i class="bi bi-sunset-fill"></i>
+        <strong>Sunset:</strong> <span id="sunset" class="fade">--:--</span>
+      </p>
+    </div>
+    <hr />
+    <div class="comparison-info">
+      <p><strong>Today:</strong><span id="today-length" class="fade">--</span></p>
+      <p><strong>1 week ago:</strong><span id="week-compare" class="fade">N/A</span></p>
+      <p><strong>In 1 week:</strong><span id="inweek-compare" class="fade">N/A</span></p>
+      <p><strong>Shortest day:</strong><span id="shortest-compare" class="fade">N/A</span></p>
+    </div>
+
+  </div>
+
+  <!-- Airport Weather Card (ENZV) -->
+  <div class="card large" id="enzv-card">
+    <h2><i class="bi bi-airplane"></i> Airport (ENZV)</h2>
+    <p>
+      <strong>Pressure:</strong> <span id="enzv-pressure" class="fade">--</span> hPa
+      <i class="bi" id="enzv-trend-arrow"></i>
+    </p>
+    <p><strong>Temp:</strong> <span id="enzv-temp" class="fade">--</span> °C</p>
+    <p><strong>Dew Pt:</strong> <span id="enzv-dew" class="fade">--</span> °C</p>
+    <p><strong>Visibility:</strong> <span id="enzv-vis" class="fade">--</span> mi</p>
+    <p><strong>Wind:</strong> <span id="enzv-wind" class="fade">--</span></p>
+
+    <div style="width: 90%; max-width: 600px;">
+      <canvas id="enzvPressureChart" class="fade"></canvas>
+    </div>
+
+    <hr />
+    <h3>Raw METARs</h3>
+    <div style="display: grid; row-gap: 0.5em;">
+      <!-- ENZV -->
+      <div style="display: flex; align-items: baseline;">
+        <span class="flight-rule-dot fade" id="dot-enzv"></span>
+        <span class="wind-icon fade" id="wind-enzv" style="margin-right:0.5em;"></span>
+        <code id="metar-enzv" class="fade" style="margin:0; padding:0;"></code>
+      </div>
+      <!-- Repeat for ENGM, KJFK, KLAX, etc. -->
+    </div>
+  </div>
+
+  <!-- VATSIM Stats Card -->
+<div class="card" id="vatsim-card">
+  <div><h2><i class="bi bi-people-fill"></i> VATSIM Stats</h2> <span id="vatsim-status" class="fade">Loading..
+  .</span></div>
+
+  <h3>VATSIM Summary</h3>
+  <table id="vatsim-summary-table" class="fade custom-table">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>Most Popular Airports</h3>
+  <table id="vatsim-airports-table" class="fade custom-table">
+    <thead>
+      <tr>
+        <th>Airport</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>Most Popular Aircraft Families</h3>
+  <table id="vatsim-aircraft-table" class="fade custom-table">
+    <thead>
+      <tr>
+        <th>Family</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3><i class="bi bi-star-fill"></i> Favorite Airports</h3>
+  <table id="vatsim-airport-table" class="fade custom-table">
+    <thead>
+      <tr>
+        <th>ICAO</th>
+        <th>
+          <i class="bi bi-airplane airplane-rotated"></i>
+          Departures
+        </th>
+        <th>
+          <i class="bi bi-airplane"></i>
+          Arrivals
+        </th>
+        <th>
+          <i class="bi bi-map-fill"></i>
+          On Ground
+        </th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- SECOND ROW for Electricity Card (fills width) -->
+  <div class="card large" id="price-card">
+    <h2><i class="bi bi-lightning-charge-fill"></i> Electricity Prices (NO2)</h2>
+
+    <p>
+      <strong>Avg Price (Today):</strong>
+      <span id="avg-price-today">--</span> øre/kWh
+    </p>
+    <p style="display: none;" id="tomorrowAverageRow">
+      <strong>Avg Price (Tomorrow):</strong>
+      <span id="avg-price-tomorrow">--</span> øre/kWh
+    </p>
+    <p>
+      <strong>Current Hour Price:</strong>
+      <span id="current-price">--</span> øre/kWh
+    </p>
+    <div class="chart-container-sm">
+      <canvas id="priceChart"></canvas>
+    </div>
+    <div class="chart-container-sm" id="tomorrowChartContainer" style="display: none;">
+      <canvas id="priceChartTomorrow"></canvas>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Homelab Dashboard (24-hour format, øre prices, extended forecast)</p>
+</footer>
+</body>
+</html>
