@@ -477,23 +477,43 @@ async function fetchMetars() {
   try {
     const res = await fetch('/api/metars');
     const data = await res.json();
-    data.forEach(m => {
-      const icao = m.icaoId?.toLowerCase();
-      if (!icao) return;
+
+    // Log the entire array for debugging
+    console.log('METAR array received:', data);
+
+    data.forEach((m, index) => {
+      // In case the feed changed property names, or there's a mismatch:
+      // Try "icaoId", then "icao" or "icao_id".
+      let icaoRaw = m.icaoId ?? m.icao_id ?? m.icao ?? null;
+
+      if (!icaoRaw) {
+        console.warn(`Skipping METAR index ${index}: no "icaoId"/"icao" found in`, m);
+        return; // skip
+      }
+      // trim & lowercase
+      const icao = icaoRaw.trim().toLowerCase();
 
       // METAR text
       const textElem = document.getElementById(`metar-${icao}`);
       if (textElem) {
-        smoothTextUpdate(textElem, m.rawOb || '--');
+        // If there's raw METAR text in "m.rawOb" or "m.raw", fallback if needed
+        const rawMetar = m.rawOb ?? m.raw ?? '--';
+        smoothTextUpdate(textElem, rawMetar);
+      } else {
+        // There's no matching <code id="metar-xxx"> in the HTML
+        console.warn(`No element #metar-${icao} found in DOM for METAR index ${index}.`);
       }
+
       // flight rule dot
       const fr = classifyFlightRules(m);
       const dotElem = document.getElementById(`dot-${icao}`);
       if (dotElem) {
         dotElem.style.backgroundColor = fr.color;
       }
+
       // wind icon
-      const wspd = m.wspd || 0;
+      // feed might be "m.wspd" or something else. Use whichever property has wind speed
+      const wspd = m.wspd ?? m.wind_speed ?? 0;
       const windIconElem = document.getElementById(`wind-${icao}`);
       if (windIconElem) {
         windIconElem.textContent = '';
@@ -511,39 +531,6 @@ async function fetchMetars() {
   } catch (err) {
     console.error('Error fetching METARs:', err);
   }
-}
-
-function classifyFlightRules(m) {
-  let lowestBase = 99999;
-  if (Array.isArray(m.clouds)) {
-    m.clouds.forEach(c => {
-      if (typeof c.base === 'number' && c.base < lowestBase) {
-        lowestBase = c.base;
-      }
-    });
-  }
-  let visNum = 10;
-  if (m.visib != null) {
-    let rawVis = (typeof m.visib === 'string') ? m.visib : String(m.visib);
-    rawVis = rawVis.replace('+','');
-    const parsed = parseFloat(rawVis);
-    if (!isNaN(parsed)) {
-      visNum = parsed;
-    }
-  }
-  let category = 'VFR';
-  let color = 'green';
-  if (lowestBase < 500 || visNum < 1) {
-    category = 'LIFR';
-    color = 'orange';
-  } else if (lowestBase < 1000 || visNum < 3) {
-    category = 'IFR';
-    color = 'red';
-  } else if (lowestBase < 3000 || visNum < 5) {
-    category = 'MVFR';
-    color = 'blue';
-  }
-  return { category, color };
 }
 
 // =========== 8) VATSIM Section with 4 tables ===========
