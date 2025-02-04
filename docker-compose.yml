@@ -1,6 +1,13 @@
-version: '3'
+version: "3.8"
 services:
-  dashboard:
+  homelab-dashboard:
     build: .
+    container_name: homelab_dashboard
+    volumes:
+      - airport-data:/usr/src/app/data   # We'll store "airportDb.json" in /usr/src/app/data
     ports:
       - "3000:3000"
+
+volumes:
+  airport-data:
+    # Docker named volume (no extra config needed)

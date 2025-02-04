@@ -17,6 +17,7 @@ from datetime import datetime, timedelta, date
 import requests
 from flask import Flask, send_from_directory, request, jsonify
 from influxdb_client import InfluxDBClient
+from airport_cache import get_airport_coords
 
 # Get environment variables from .env file
 from dotenv import load_dotenv
@@ -449,6 +450,41 @@ def api_metars():
     except requests.RequestException as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/distance")
+def api_distance():
+    icao = request.args.get("icao", "ENGM")
+    lat = request.args.get("lat", None, float)
+    lon = request.args.get("lon", None, float)
+
+    if not lat or not lon:
+        return jsonify({"error": "Missing lat/lon"}), 400
+
+    coords = get_airport_coords(icao)
+    if not coords:
+        return jsonify({"error": f"No coords found for {icao}"}), 404
+
+    dist_nm = distance_nm(lat, lon, coords["lat"], coords["lon"])
+    return jsonify({
+        "icao": icao,
+        "yourPos": [lat, lon],
+        "airportPos": [coords["lat"], coords["lon"]],
+        "distanceNm": round(dist_nm, 1)
+    })
+
+def distance_nm(lat1, lon1, lat2, lon2):
+    # same formula as your code
+    import math
+    R = 6371.0  # Earth radius in km
+    toRad = math.pi / 180.0
+    dLat = (lat2 - lat1) * toRad
+    dLon = (lon2 - lon1) * toRad
+    a = (math.sin(dLat/2) ** 2
+         + math.cos(lat1*toRad) * math.cos(lat2*toRad)
+         * math.sin(dLon/2) ** 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    dist_km = R * c
+    dist_nm = dist_km / 1.852
+    return dist_nm
 
 
 # ------------------------------------------------------

@@ -608,37 +608,66 @@ const trackedAirports = [
 
 const VATSIM_DATA_URL = 'https://data.vatsim.net/v3/vatsim-data.json';
 
-// 8D) Main fetch for VATSIM Stats
-async function fetchVatsimStats() {
-  const statusElem = document.getElementById('vatsim-status');
+// Use your own CID here:
+const MY_VATSIM_CID = 908962;
 
-  // Summary table
+// We'll store lat/lon for some major airports to compute distance:
+const airportCoords = {
+  ENGM: { lat: 60.202, lon: 11.083 },
+  ENZV: { lat: 58.8765, lon: 5.637 },
+  KJFK: { lat: 40.6398, lon: -73.7789 },
+  KLAX: { lat: 33.9425, lon: -118.4081 },
+  // add any others you commonly fly to...
+};
+
+// Helper to compute nm distance between two lat/lon
+function distanceNm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const toRad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toRad;
+  const dLon = (lon2 - lon1) * toRad;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*toRad)*Math.cos(lat2*toRad)*
+            Math.sin(dLon/2)**2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distKm = R * c;
+  const distNm = distKm / 1.852;
+  return distNm;
+}
+
+async function fetchVatsimStats() {
+  // IDs for your 4 main tables
   const summaryTbody  = document.querySelector('#vatsim-summary-table tbody');
-  // Most popular airports
   const airportsTbody = document.querySelector('#vatsim-airports-table tbody');
-  // Most popular aircraft
   const aircraftTbody = document.querySelector('#vatsim-aircraft-table tbody');
-  // Favorite airports
   const trackedTbody  = document.querySelector('#vatsim-airport-table tbody');
 
-  smoothTextUpdate(statusElem, 'Loading...');
+  // IDs for your personal status box
+  const myCard        = document.getElementById('my-vatsim-card');
+  const myCallsignEl  = document.getElementById('my-callsign');
+  const myAircraftEl  = document.getElementById('my-aircraft');
+  const myDepEl       = document.getElementById('my-dep');
+  const myArrEl       = document.getElementById('my-arr');
+  const myAltEl       = document.getElementById('my-altitude');
+  const myDistEl      = document.getElementById('my-dist-remaining');
+  const myETEEl       = document.getElementById('my-ete');
+
   try {
-    const resp = await fetch(VATSIM_DATA_URL);
+    const resp = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
     if (!resp.ok) {
       throw new Error(`HTTP ${resp.status}`);
     }
     const data = await resp.json();
+
+    // Log a timestamp for debugging, instead of "Data updated" in UI
+    console.log(`[VATSIM Stats] Updated at ${new Date().toLocaleTimeString()}`);
 
     // Summaries
     const totalClients = data.general.connected_clients || 0;
     const totalPilots  = data.pilots ? data.pilots.length : 0;
     const totalAtc     = data.controllers ? data.controllers.length : 0;
 
-    smoothTextUpdate(statusElem, 'Data updated');
-
-    ////////////////////////////
     // 1) VATSIM Summary Table
-    ////////////////////////////
     const summaryRows = [
       `<tr><td>Total Clients</td><td>${totalClients}</td></tr>`,
       `<tr><td>Pilots</td><td>${totalPilots}</td></tr>`,
@@ -646,29 +675,24 @@ async function fetchVatsimStats() {
     ];
     smoothTableUpdate(summaryTbody, summaryRows);
 
-    ////////////////////////////
     // 2) Most Popular Airports
-    ////////////////////////////
     const depMap = {};
     data.pilots.forEach(p => {
       const dep = p.flight_plan?.departure;
       if (dep) {
-        const apt = dep.toUpperCase();
+        const apt = dep.toUpperCase().trim();
         depMap[apt] = (depMap[apt] || 0) + 1;
       }
     });
     const sortedApts = Object.entries(depMap)
       .sort((a,b) => b[1] - a[1])
       .slice(0,5);
-
     const airportRows = sortedApts.map(([apt, count]) =>
       `<tr><td>${apt}</td><td>${count}</td></tr>`
     );
     smoothTableUpdate(airportsTbody, airportRows);
 
-    ////////////////////////////
     // 3) Most Popular Aircraft
-    ////////////////////////////
     const acftMap = {};
     data.pilots.forEach(p => {
       const short = p.flight_plan?.aircraft_short;
@@ -679,34 +703,27 @@ async function fetchVatsimStats() {
     const sortedAcft = Object.entries(acftMap)
       .sort((a,b) => b[1] - a[1])
       .slice(0,5);
-
     const aircraftRows = sortedAcft.map(([fam, c]) =>
       `<tr><td>${fam}</td><td>${c}</td></tr>`
     );
     smoothTableUpdate(aircraftTbody, aircraftRows);
 
-    ////////////////////////////
     // 4) Favorite Airports
-    ////////////////////////////
     const stats = {};
     trackedAirports.forEach(a => {
       stats[a.icao] = { icao:a.icao, name:a.name, departures:0, arrivals:0, onGround:0 };
     });
-
     data.pilots.forEach(pilot => {
-      const dep = pilot.flight_plan?.departure?.toUpperCase() || "";
-      const arr = pilot.flight_plan?.arrival?.toUpperCase() || "";
-
+      const dep = pilot.flight_plan?.departure?.toUpperCase().trim() || "";
+      const arr = pilot.flight_plan?.arrival?.toUpperCase().trim() || "";
       if (stats[dep]) stats[dep].departures++;
       if (stats[arr]) stats[arr].arrivals++;
-
       trackedAirports.forEach(apt => {
         if (isOnGround(pilot, apt)) {
           stats[apt.icao].onGround++;
         }
       });
     });
-
     const favRows = trackedAirports.map(a => {
       const s = stats[a.icao];
       return `
@@ -720,9 +737,65 @@ async function fetchVatsimStats() {
     });
     smoothTableUpdate(trackedTbody, favRows);
 
+    // ==============================
+    // 5) My Personal Pilot Tracking
+    // ==============================
+    const myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
+    if (!myPilot) {
+      // Not found, hide the card
+      myCard.style.display = 'none';
+    } else {
+      // Found you in the list
+      myCard.style.display = 'block';
+
+      // Basic fields
+      const cSign = myPilot.callsign || '??';
+      const plan  = myPilot.flight_plan || {};
+      const acft  = plan.aircraft || '--';
+      const dep   = plan.departure || '--';
+      const arr   = plan.arrival || '--';
+
+      // altitude from pilot data
+      const alt   = myPilot.altitude || 0;
+
+      // put them in DOM
+      smoothTextUpdate(myCallsignEl, cSign);
+      smoothTextUpdate(myAircraftEl, acft);
+      smoothTextUpdate(myDepEl, dep);
+      smoothTextUpdate(myArrEl, arr);
+      smoothTextUpdate(myAltEl, alt.toString());
+
+      // Distance & ETE
+      let distRemaining = '--';
+      let eteString     = '--';
+
+      // If we have an arrival in our airportCoords dictionary, compute distance
+      const arrKey = arr.toUpperCase().trim();
+      const arrCoords = airportCoords[arrKey];
+      if (arrCoords && myPilot.latitude && myPilot.longitude) {
+        const d = distanceNm(myPilot.latitude, myPilot.longitude, arrCoords.lat, arrCoords.lon);
+        distRemaining = d.toFixed(0); // round to nearest nm
+
+        // Time = distance / groundspeed
+        // pilot.groundspeed is in knots
+        // If 0 or missing, we skip
+        const gs = myPilot.groundspeed || 0;
+        if (gs > 0) {
+          const hours = d / gs; // e.g. distance 250 / 250 knots => 1.0 hour
+          const hh = Math.floor(hours);
+          const mm = Math.floor((hours - hh)*60);
+          eteString = `${hh}h ${mm}m`;
+        }
+      }
+
+      smoothTextUpdate(myDistEl, distRemaining);
+      smoothTextUpdate(myETEEl, eteString);
+    }
+
   } catch (err) {
     console.error('Error fetching VATSIM stats:', err);
-    smoothTextUpdate(statusElem, `Error: ${err.message}`);
+    // If we want to hide your card as well if error
+    document.getElementById('my-vatsim-card').style.display = 'none';
   }
 }
 
