@@ -12,7 +12,6 @@ DB_PATH = DB_DIR / "airportDb.json"
 
 _airport_db = {}
 
-
 def _load_db():
     global _airport_db
     if not DB_PATH.exists():
@@ -28,7 +27,6 @@ def _load_db():
         print(f"[airport_cache] Error reading airportDb.json, starting empty: {e}")
         _airport_db = {}
 
-
 def _save_db():
     global _airport_db
     DB_DIR.mkdir(exist_ok=True)  # ensure folder exists
@@ -39,18 +37,37 @@ def _save_db():
     except Exception as e:
         print(f"[airport_cache] Error writing airportDb.json: {e}")
 
-
 def _fetch_coords_from_checkwx(icao: str):
     """
-    Queries CheckWX's airport endpoint:
-    GET https://api.checkwx.com/airport/{icao}
-    Header: X-API-Key: <your key>
-    Returns dict {"lat": <float>, "lon": <float>} or None if not found.
+    Queries CheckWX's station endpoint:
+      GET https://api.checkwx.com/station/{icao}
+    with header "X-API-Key: <your key>"
+
+    JSON example:
+    {
+      "results": 1,
+      "data": [{
+        "icao": "KLAX",
+        "latitude": {
+          "decimal": 33.942501,
+          ...
+        },
+        "longitude": {
+          "decimal": -118.407997,
+          ...
+        },
+        "geometry": {
+          "coordinates": [ -118.407997, 33.942501 ],
+          "type": "Point"
+        },
+        ...
+      }]
+    }
+    Returns dict {"lat": float, "lon": float} or None if not found/fetch failed.
     """
-    url = f"https://api.checkwx.com/airport/{icao}"
+    url = f"https://api.checkwx.com/station/{icao}"
     headers = {"X-API-Key": CHECKWX_API_KEY}
 
-    # Log which key you're using. If you're worried about security, you can mask part of it:
     masked_key = (CHECKWX_API_KEY[:4] + "****") if CHECKWX_API_KEY else "(None)"
     print(f"[airport_cache] _fetch_coords_from_checkwx: icao={icao}, URL={url}, KEY={masked_key}")
 
@@ -60,7 +77,7 @@ def _fetch_coords_from_checkwx(icao: str):
         resp.raise_for_status()
 
         data = resp.json()
-        print(f"[airport_cache]  CheckWX JSON keys: {list(data.keys())}")  # e.g. ['results', 'data']
+        print(f"[airport_cache]  CheckWX JSON keys: {list(data.keys())}")
 
         arr = data.get("data", [])
         if not arr:
@@ -68,9 +85,13 @@ def _fetch_coords_from_checkwx(icao: str):
             return None
 
         first = arr[0]
-        loc = first.get("location", {})
-        lat = loc.get("latitude")
-        lon = loc.get("longitude")
+        lat = first.get("latitude", {}).get("decimal")
+        lon = first.get("longitude", {}).get("decimal")
+
+        # Alternatively, you could parse geometry.coordinates
+        # coords = first.get("geometry", {}).get("coordinates", [])
+        # if coords and len(coords) == 2:
+        #     lon, lat = coords
 
         if lat is None or lon is None:
             print(f"[airport_cache]  No lat/lon in record for {icao}. Record = {first}")
@@ -80,10 +101,8 @@ def _fetch_coords_from_checkwx(icao: str):
         return {"lat": lat, "lon": lon}
 
     except requests.RequestException as e:
-        # You can print the entire response text for debugging if you want
         print(f"[airport_cache]  CheckWX API call failed for {icao}: {e}")
         return None
-
 
 def get_airport_coords(icao: str):
     """
@@ -109,7 +128,6 @@ def get_airport_coords(icao: str):
         print(f"[airport_cache]  => Could NOT find coords for {icao} (None returned)")
 
     return coords
-
 
 # Load DB upon module import
 _load_db()
