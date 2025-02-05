@@ -15,7 +15,6 @@ updateTime();
 // Smooth text fade helper
 // ==========================
 function smoothTextUpdate(elem, newValue) {
-  // Fade out, then update text, fade in
   elem.classList.add('fade-updating');
   setTimeout(() => {
     elem.textContent = newValue;
@@ -23,7 +22,6 @@ function smoothTextUpdate(elem, newValue) {
   }, 300);
 }
 
-// Fade update for entire <ol>
 function smoothListUpdate(listElem, items) {
   listElem.classList.add('fade-updating');
   setTimeout(() => {
@@ -37,7 +35,6 @@ function smoothListUpdate(listElem, items) {
   }, 300);
 }
 
-// Fade update for a table <tbody>
 function smoothTableUpdate(tbodyElem, rowHtmlArray) {
   tbodyElem.classList.add('fade-updating');
   setTimeout(() => {
@@ -64,26 +61,20 @@ async function fetchCurrentWeather() {
       return;
     }
 
-    // Current conditions
     const currentDetails = timeseries[0].data.instant.details;
-
-    // Temperature
     const tempC = currentDetails.air_temperature.toFixed(1);
     smoothTextUpdate(document.getElementById('temperature'), `${tempC} °C`);
 
-    // Hidden #wind-speed
     smoothTextUpdate(
       document.getElementById('wind-speed'),
       `${currentDetails.wind_speed.toFixed(1)} m/s`
     );
 
-    // Compass speed
     smoothTextUpdate(
       document.getElementById('wind-speed-value'),
       `${currentDetails.wind_speed.toFixed(1)} m/s`
     );
 
-    // Rotate arrow
     const windDir = currentDetails.wind_from_direction;
     document.getElementById('wind-arrow').style.transform = `rotate(${windDir}deg)`;
 
@@ -270,7 +261,6 @@ async function fetchPrices() {
   try {
     const res = await fetch('/api/prices');
     const data = await res.json();
-    // "today"
     if (data.today && data.today.prices) {
       const todayAvg = data.today.average;
       smoothTextUpdate(
@@ -308,7 +298,6 @@ async function fetchPrices() {
       createPriceChart('priceChart', todayLabels, todayValues, currentHour);
     }
 
-    // "tomorrow"
     if (data.tomorrow && data.tomorrow.prices) {
       document.getElementById('tomorrowAverageRow').style.display = 'block';
       const tomAvg = data.tomorrow.average;
@@ -390,22 +379,18 @@ async function fetchEnzvData() {
     }
     const { current, history, trend } = data;
 
-    // Pressure
     smoothTextUpdate(
       document.getElementById('enzv-pressure'),
       current.altim_hpa != null ? current.altim_hpa.toFixed(1) : '--'
     );
-    // Temp
     smoothTextUpdate(
       document.getElementById('enzv-temp'),
       current.temp_c != null ? current.temp_c.toFixed(1) : '--'
     );
-    // Dew
     smoothTextUpdate(
       document.getElementById('enzv-dew'),
       current.dewpoint_c != null ? current.dewpoint_c.toFixed(1) : '--'
     );
-    // Vis
     smoothTextUpdate(
       document.getElementById('enzv-vis'),
       current.visibility_statute_mi != null
@@ -413,14 +398,12 @@ async function fetchEnzvData() {
         : '--'
     );
 
-    // Wind
     let windStr = '--';
     if (current.wind_dir_deg != null && current.wind_speed_kt != null) {
       windStr = `${Math.round(current.wind_dir_deg)}° @ ${Math.round(current.wind_speed_kt)} kt`;
     }
     smoothTextUpdate(document.getElementById('enzv-wind'), windStr);
 
-    // Trend arrow
     const arrowEl = document.getElementById('enzv-trend-arrow');
     arrowEl.classList.remove('bi-arrow-up', 'bi-arrow-down', 'bi-dash');
     if (trend === 'up') arrowEl.classList.add('bi-arrow-up');
@@ -481,18 +464,15 @@ async function fetchMetars() {
       const icao = m.icaoId?.toLowerCase();
       if (!icao) return;
 
-      // METAR text
       const textElem = document.getElementById(`metar-${icao}`);
       if (textElem) {
         smoothTextUpdate(textElem, m.rawOb || '--');
       }
-      // flight rule dot
       const fr = classifyFlightRules(m);
       const dotElem = document.getElementById(`dot-${icao}`);
       if (dotElem) {
         dotElem.style.backgroundColor = fr.color;
       }
-      // wind icon
       const wspd = m.wspd || 0;
       const windIconElem = document.getElementById(`wind-${icao}`);
       if (windIconElem) {
@@ -548,7 +528,7 @@ function classifyFlightRules(m) {
 
 // =========== 8) VATSIM Section with 4 tables ===========
 
-// 8A) Distances for "on ground"
+// 8A) Distances for "on ground" check
 function distanceNm(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
   const toRad = Math.PI / 180;
@@ -559,14 +539,12 @@ function distanceNm(lat1, lon1, lat2, lon2) {
             Math.sin(dLon/2)**2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   const distKm = R * c;
-  const distNm = distKm / 1.852;
-  return distNm;
+  return distKm / 1.852; // nm
 }
 function isOnGround(pilot, airport) {
   if (!pilot.latitude || !pilot.longitude) return false;
   const dist = distanceNm(airport.lat, airport.lon, pilot.latitude, pilot.longitude);
   if (dist > 5) return false; // outside 5 nm
-  // also check speed or altitude
   if (pilot.groundspeed && pilot.groundspeed < 50) return true;
   if (pilot.altitude && pilot.altitude < 2000) return true;
   return false;
@@ -600,49 +578,21 @@ const trackedAirports = [
   { icao: "ENGM", name: "Oslo Gardermoen",    lat: 60.202,  lon: 11.083 },
   { icao: "ENZV", name: "Stavanger Sola",     lat: 58.8765, lon: 5.637 },
   { icao: "KJFK", name: "New York JFK",       lat: 40.6398, lon: -73.7789 },
-  { icao: "KEWR", name: "Newark Liberty EWR",     lat: 40.6925, lon: -74.1687 },
-  { icao: "KLGA", name: "New York LaGuardia",    lat: 40.7772, lon: -73.8726 },
-  { icao: "KPHL", name: "Philadelphia PHL",      lat: 39.8719, lon: -75.2411 },
-  { icao: "KLAX", name: "Los Angeles LAX",       lat: 33.9425, lon: -118.4081 }
+  { icao: "KEWR", name: "Newark Liberty EWR", lat: 40.6925, lon: -74.1687 },
+  { icao: "KLGA", name: "New York LaGuardia", lat: 40.7772, lon: -73.8726 },
+  { icao: "KPHL", name: "Philadelphia PHL",   lat: 39.8719, lon: -75.2411 },
+  { icao: "KLAX", name: "Los Angeles LAX",    lat: 33.9425, lon: -118.4081 }
 ];
 
 const VATSIM_DATA_URL = 'https://data.vatsim.net/v3/vatsim-data.json';
-
-// Use your own CID here:
 const MY_VATSIM_CID = 908962;
 
-// We'll store lat/lon for some major airports to compute distance:
-const airportCoords = {
-  ENGM: { lat: 60.202, lon: 11.083 },
-  ENZV: { lat: 58.8765, lon: 5.637 },
-  KJFK: { lat: 40.6398, lon: -73.7789 },
-  KLAX: { lat: 33.9425, lon: -118.4081 },
-  // add any others you commonly fly to...
-};
-
-// Helper to compute nm distance between two lat/lon
-function distanceNm(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth radius in km
-  const toRad = Math.PI / 180;
-  const dLat = (lat2 - lat1) * toRad;
-  const dLon = (lon2 - lon1) * toRad;
-  const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1*toRad)*Math.cos(lat2*toRad)*
-            Math.sin(dLon/2)**2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const distKm = R * c;
-  const distNm = distKm / 1.852;
-  return distNm;
-}
-
 async function fetchVatsimStats() {
-  // IDs for your 4 main tables
   const summaryTbody  = document.querySelector('#vatsim-summary-table tbody');
   const airportsTbody = document.querySelector('#vatsim-airports-table tbody');
   const aircraftTbody = document.querySelector('#vatsim-aircraft-table tbody');
   const trackedTbody  = document.querySelector('#vatsim-airport-table tbody');
 
-  // IDs for your personal status box
   const myCard        = document.getElementById('my-vatsim-card');
   const myCallsignEl  = document.getElementById('my-callsign');
   const myAircraftEl  = document.getElementById('my-aircraft');
@@ -653,16 +603,13 @@ async function fetchVatsimStats() {
   const myETEEl       = document.getElementById('my-ete');
 
   try {
-    const resp = await fetch('https://data.vatsim.net/v3/vatsim-data.json');
+    const resp = await fetch(VATSIM_DATA_URL);
     if (!resp.ok) {
       throw new Error(`HTTP ${resp.status}`);
     }
     const data = await resp.json();
-
-    // Log a timestamp for debugging, instead of "Data updated" in UI
     console.log(`[VATSIM Stats] Updated at ${new Date().toLocaleTimeString()}`);
 
-    // Summaries
     const totalClients = data.general.connected_clients || 0;
     const totalPilots  = data.pilots ? data.pilots.length : 0;
     const totalAtc     = data.controllers ? data.controllers.length : 0;
@@ -675,7 +622,7 @@ async function fetchVatsimStats() {
     ];
     smoothTableUpdate(summaryTbody, summaryRows);
 
-    // 2) Most Popular Airports
+    // 2) Most Popular Airports (by departure)
     const depMap = {};
     data.pilots.forEach(p => {
       const dep = p.flight_plan?.departure;
@@ -737,64 +684,69 @@ async function fetchVatsimStats() {
     });
     smoothTableUpdate(trackedTbody, favRows);
 
-    // ==============================
     // 5) My Personal Pilot Tracking
-    // ==============================
     const myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
     if (!myPilot) {
-      // Not found, hide the card
       myCard.style.display = 'none';
     } else {
-      // Found you in the list
       myCard.style.display = 'block';
-
-      // Basic fields
-      const cSign = myPilot.callsign || '??';
       const plan  = myPilot.flight_plan || {};
+      const cSign = myPilot.callsign || '??';
       const acft  = plan.aircraft || '--';
       const dep   = plan.departure || '--';
       const arr   = plan.arrival || '--';
-
-      // altitude from pilot data
       const alt   = myPilot.altitude || 0;
 
-      // put them in DOM
       smoothTextUpdate(myCallsignEl, cSign);
       smoothTextUpdate(myAircraftEl, acft);
       smoothTextUpdate(myDepEl, dep);
       smoothTextUpdate(myArrEl, arr);
       smoothTextUpdate(myAltEl, alt.toString());
 
-      // Distance & ETE
       let distRemaining = '--';
       let eteString     = '--';
 
-      // If we have an arrival in our airportCoords dictionary, compute distance
-      const arrKey = arr.toUpperCase().trim();
-      const arrCoords = airportCoords[arrKey];
-      if (arrCoords && myPilot.latitude && myPilot.longitude) {
-        const d = distanceNm(myPilot.latitude, myPilot.longitude, arrCoords.lat, arrCoords.lon);
-        distRemaining = d.toFixed(0); // round to nearest nm
+      // If we have a valid arrival and pilot lat/lon, call /api/distance
+      if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
+        const arrKey = arr.trim().toUpperCase();
+        const lat    = myPilot.latitude;
+        const lon    = myPilot.longitude;
+        fetch(`/api/distance?icao=${arrKey}&lat=${lat}&lon=${lon}`)
+          .then(r => r.json())
+          .then(distData => {
+            if (distData.error) {
+              console.warn('Distance error:', distData.error);
+              return;
+            }
+            // distData.distanceNm is the computed distance
+            const d = distData.distanceNm; // number
+            distRemaining = d.toFixed(0);
+            smoothTextUpdate(myDistEl, distRemaining);
 
-        // Time = distance / groundspeed
-        // pilot.groundspeed is in knots
-        // If 0 or missing, we skip
-        const gs = myPilot.groundspeed || 0;
-        if (gs > 0) {
-          const hours = d / gs; // e.g. distance 250 / 250 knots => 1.0 hour
-          const hh = Math.floor(hours);
-          const mm = Math.floor((hours - hh)*60);
-          eteString = `${hh}h ${mm}m`;
-        }
+            // ETE if groundspeed > 0
+            const gs = myPilot.groundspeed || 0;
+            if (gs > 0 && d > 1) {
+              const hours = d / gs;
+              const hh = Math.floor(hours);
+              const mm = Math.floor((hours - hh) * 60);
+              eteString = `${hh}h ${mm}m`;
+              smoothTextUpdate(myETEEl, eteString);
+            } else {
+              smoothTextUpdate(myETEEl, '--');
+            }
+          })
+          .catch(err => {
+            console.error('Distance fetch failed', err);
+          });
+      } else {
+        // If arrival is invalid or lat/lon missing
+        smoothTextUpdate(myDistEl, '--');
+        smoothTextUpdate(myETEEl, '--');
       }
-
-      smoothTextUpdate(myDistEl, distRemaining);
-      smoothTextUpdate(myETEEl, eteString);
     }
 
   } catch (err) {
     console.error('Error fetching VATSIM stats:', err);
-    // If we want to hide your card as well if error
     document.getElementById('my-vatsim-card').style.display = 'none';
   }
 }
