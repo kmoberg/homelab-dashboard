@@ -456,21 +456,28 @@ def api_distance():
     lat = request.args.get("lat", None, float)
     lon = request.args.get("lon", None, float)
 
-    if not lat or not lon:
-        return jsonify({"error": "Missing lat/lon"}), 400
+    print(f"[/api/distance] Received request: icao={icao}, lat={lat}, lon={lon}")
+
+    if lat is None or lon is None:
+        err_msg = "[/api/distance] Missing lat/lon in query params"
+        print(err_msg)
+        return jsonify({"error": err_msg}), 400
 
     coords = get_airport_coords(icao)
     if not coords:
-        return jsonify({"error": f"No coords found for {icao}"}), 404
+        err_msg = f"[/api/distance] No coords found for {icao}"
+        print(err_msg)
+        return jsonify({"error": err_msg}), 404
 
     dist_nm = distance_nm(lat, lon, coords["lat"], coords["lon"])
+    print(f"[/api/distance] Computed distance {dist_nm:.1f} nm from ({lat},{lon}) to {coords}")
+
     return jsonify({
         "icao": icao,
         "yourPos": [lat, lon],
         "airportPos": [coords["lat"], coords["lon"]],
         "distanceNm": round(dist_nm, 1)
     })
-
 def distance_nm(lat1, lon1, lat2, lon2):
     # same formula as your code
     import math
