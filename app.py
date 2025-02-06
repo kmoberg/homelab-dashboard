@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-app.py
+app.py - Main Flask app
 
-A Python Flask server that:
-1) Serves `index.html` from `public/`.
-2) Provides /api/weather   -> MET (LocationForecast 2.0), plus symbol codes
-3) Provides /api/prices    -> hvakosterstrommen.no (with average & tomorrow logic if you want)
-4) Provides /api/sun       -> local sunrise/sunset
-5) Provides /api/enzv      -> Influx query for airport
-6) Provides /api/metars    -> FAA METAR
+This file:
+  - Loads environment variables
+  - Configures and initializes the database (SQLite)
+  - Registers the aircraft blueprint at /api/aircraft
+  - Defines your existing routes for weather, prices, etc.
 """
 
 import os
 import json
 from datetime import datetime, timedelta, date
 import requests
+
 from flask import Flask, send_from_directory, request, jsonify
+
 from influxdb_client import InfluxDBClient
 from airport_cache import get_airport_coords, get_airport_data
 from aircraft_cache import (
@@ -24,12 +24,30 @@ from aircraft_cache import (
     create_or_update_aircraft,
     delete_aircraft
 )
-
-# Get environment variables from .env file
 from dotenv import load_dotenv
+from db import db, init_db_uri
+from routes.aircraft_routes import aircraft_bp
 
-# Create Flask app
+
+
+
+###############################
+# 1) Load ENV, create Flask
+###############################
+load_dotenv()
 app = Flask(__name__, static_folder='public', static_url_path='')
+app = init_db_uri(app)  # Initialize the SQLite database
+
+db.init_app(app)  # Bind the SQLAlchemy db to the Flask app
+with app.app_context():
+    db.create_all()  # Create the tables if they don't exist
+
+
+###############################
+# 2) Register the aircraft blueprint
+###############################
+# Now all routes in `aircraft_bp` are available under /api/aircraft
+app.register_blueprint(aircraft_bp, url_prefix="/api/aircraft")
 
 # Load your pre-fetched sunrise/sunset data from local JSON
 # Example structure: [{ "date": "2025-01-01", "sunrise": "08:47", "sunset": "16:11" }, ...]
@@ -573,98 +591,6 @@ def api_airport_location(icao):
         "lat": lat,
         "lon": lon
     })
-
-
-# ------------------------------------------------------
-# 7. /api/aircraft endpoints (CRUD)
-# ------------------------------------------------------
-
-@app.route("/api/aircraft", methods=["GET"])
-def api_list_aircraft():
-    """
-    GET /api/aircraft
-    Return all aircraft in the local DB (dictionary).
-    """
-    all_aircraft = get_all_aircraft()
-    # If you want a list of records, transform the dict
-    # or just return the dict. We'll do a list:
-    records = list(all_aircraft.values())
-    return jsonify({"count": len(records), "aircraft": records})
-
-
-@app.route("/api/aircraft", methods=["POST"])
-def api_create_aircraft():
-    """
-    POST /api/aircraft
-    Body JSON example:
-    {
-      "registration": "N123AB",
-      "icao24": "A0B1C2",
-      "selcal": "AB-CD",
-      ...
-    }
-    Creates (or updates) an aircraft record in local DB.
-    """
-    data = request.json
-    if not data:
-        return jsonify({"error": "Missing JSON body"}), 400
-
-    ok, msg = create_or_update_aircraft(data)
-    if not ok:
-        return jsonify({"error": msg}), 400
-    return jsonify({"status": msg})
-
-
-@app.route("/api/aircraft/<reg>", methods=["GET"])
-def api_get_aircraft(reg):
-    """
-    GET /api/aircraft/<reg>
-    Return the aircraft record if found, else 404.
-    """
-    record = get_aircraft_by_reg(reg)
-    if not record:
-        return jsonify({"error": f"No aircraft found for {reg}"}), 404
-    return jsonify(record)
-
-
-@app.route("/api/aircraft/<reg>", methods=["PUT"])
-def api_update_aircraft(reg):
-    """
-    PUT /api/aircraft/<reg>
-    Similar to POST, but specifically updates an existing record or creates if not exist.
-    We also cross-check that body 'registration' matches URL param, or handle accordingly.
-    """
-    data = request.json
-    if not data:
-        return jsonify({"error": "Missing JSON body"}), 400
-
-    # Ensure the JSON 'registration' matches URL param if you want that logic enforced:
-    # This is optional, depends how you want the API to behave
-    body_reg = data.get("registration", "").upper().strip()
-    if body_reg and body_reg != reg.upper().strip():
-        return jsonify({"error": "Registration mismatch between URL and JSON body"}), 400
-
-    # Force data["registration"] to be the URL param if missing
-    data["registration"] = reg.upper().strip()
-
-    ok, msg = create_or_update_aircraft(data)
-    if not ok:
-        return jsonify({"error": msg}), 400
-    return jsonify({"status": msg})
-
-
-@app.route("/api/aircraft/<reg>", methods=["DELETE"])
-def api_delete_aircraft(reg):
-    """
-    DELETE /api/aircraft/<reg>
-    Deletes the record if it exists.
-    """
-    success = delete_aircraft(reg)
-    if success:
-        return jsonify({"status": f"Aircraft {reg} deleted."})
-    else:
-        return jsonify({"error": f"No aircraft found for {reg}"}), 404
-
 
 # ------------------------------------------------------
 # Run the Flask app
