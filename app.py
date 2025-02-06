@@ -456,7 +456,8 @@ def api_metars():
     ]
     """
 
-    url = "https://aviationweather.gov/api/data/metar?ids=kjfk,klax,enzv,engm&format=json"
+    url = ("https://aviationweather.gov/api/data/metar?ids=kjfk,klax,enzv,engm,kord,egll,rjaa,ekch,kmia,"
+           "tncm&format=json")
     try:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()  # raise exception if not 2xx

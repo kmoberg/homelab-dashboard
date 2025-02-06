@@ -572,6 +572,46 @@ async function fetchMetars() {
   }
 }
 
+// 1) Define your list of airports.
+const airportList = ["ENZV", "ENGM", "KJFK", "KLAX", "KORD", "TNCM", "EGLL", "RJAA"];
+
+// 2) Get the container from the DOM
+const metarContainer = document.getElementById("metar-container");
+
+// 3) For each airport, create the same row structure
+airportList.forEach(icao => {
+  // Create a <div> with the same layout
+  const rowDiv = document.createElement('div');
+  rowDiv.style.display = 'flex';
+  rowDiv.style.alignItems = 'baseline';
+
+  // Create the flight-rule dot
+  const dotSpan = document.createElement('span');
+  dotSpan.className = 'flight-rule-dot fade';
+  dotSpan.id = `dot-${icao.toLowerCase()}`;
+
+  // Create the wind icon span
+  const windSpan = document.createElement('span');
+  windSpan.className = 'wind-icon fade';
+  windSpan.id = `wind-${icao.toLowerCase()}`;
+  windSpan.style.marginRight = '0.5em';
+
+  // Create the code element
+  const codeElem = document.createElement('code');
+  codeElem.className = 'fade';
+  codeElem.id = `metar-${icao.toLowerCase()}`;
+  codeElem.style.margin = '0';
+  codeElem.style.padding = '0';
+
+  // Append them all inside rowDiv
+  rowDiv.appendChild(dotSpan);
+  rowDiv.appendChild(windSpan);
+  rowDiv.appendChild(codeElem);
+
+  // Finally, append rowDiv into the container
+  metarContainer.appendChild(rowDiv);
+});
+
 function classifyFlightRules(m) {
   let lowestBase = 99999;
   if (Array.isArray(m.clouds)) {

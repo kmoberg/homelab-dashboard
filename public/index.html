@@ -125,32 +125,10 @@
     </div>
 
     <hr />
-    <h3>Raw METARs</h3>
-    <div style="display: grid; row-gap: 0.5em;">
-      <!-- ENZV -->
-      <div style="display: flex; align-items: baseline;">
-        <span class="flight-rule-dot fade" id="dot-enzv"></span>
-        <span class="wind-icon fade" id="wind-enzv" style="margin-right:0.5em;"></span>
-        <code id="metar-enzv" class="fade" style="margin:0; padding:0;"></code>
-      </div>
-      <div style="display: flex; align-items: baseline;">
-        <span class="flight-rule-dot fade" id="dot-engm"></span>
-        <span class="wind-icon fade" id="wind-engm" style="margin-right:0.5em;"></span>
-        <code id="metar-engm" class="fade" style="margin:0; padding:0;"></code>
-      </div>
-      <div style="display: flex; align-items: baseline;">
-        <span class="flight-rule-dot fade" id="dot-kjfk"></span>
-        <span class="wind-icon fade" id="wind-kjfk" style="margin-right:0.5em;"></span>
-        <code id="metar-kjfk" class="fade" style="margin:0; padding:0;"></code>
-      </div>
-      <div style="display: flex; align-items: baseline;">
-        <span class="flight-rule-dot fade" id="dot-klax"></span>
-        <span class="wind-icon fade" id="wind-klax" style="margin-right:0.5em;"></span>
-        <code id="metar-klax" class="fade" style="margin:0; padding:0;"></code>
-      </div>
-      <!-- Repeat for ENGM, KJFK, KLAX, etc. -->
-    </div>
-  </div>
+<h3>Raw METARs</h3>
+<div id="metar-container" style="display: grid; row-gap: 0.5em;">
+  <!-- We'll fill this container via JS -->
+</div>
 
   <!-- My personal VATSIM status box -->
 <div class="card" id="my-vatsim-card" style="display:none;">
