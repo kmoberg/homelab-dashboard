@@ -18,7 +18,6 @@ from flask import Flask, send_from_directory, request, jsonify
 from flask_migrate import Migrate
 
 from influxdb_client import InfluxDBClient
-from airport_cache import get_airport_coords, get_airport_data
 from aircraft_cache import (
     get_all_aircraft,
     get_aircraft_by_reg,
@@ -28,12 +27,8 @@ from aircraft_cache import (
 from dotenv import load_dotenv
 from db import db, init_db_uri
 
-
 from routes.aircraft_routes import aircraft_bp
 from routes.airport_routes import airport_bp
-
-
-
 
 ###############################
 # 1) Load ENV, create Flask
@@ -47,7 +42,6 @@ with app.app_context():
     migrate = Migrate(app, db)
 
     # db.create_all()  # Create the tables if they don't exist
-
 
 ###############################
 # 2) Register the blueprints
@@ -530,8 +524,6 @@ def distance_nm(lat1, lon1, lat2, lon2):
     dist_km = R * c
     dist_nm = dist_km / 1.852
     return dist_nm
-
-
 
 
 # ------------------------------------------------------
