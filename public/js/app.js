@@ -85,20 +85,82 @@ async function fetchCurrentWeather() {
   }
 }
 
-function setSymbolImage(imgId, symbolCode) {
+/**
+ * setSymbolImage
+ * @param {string} imgId - The DOM id of the <img> element to update.
+ * @param {string} symbolCode - The base symbol code from met.no (e.g. "clearsky_day").
+ * @param {string} dateStr - The date in "YYYY-MM-DD" format (defaults to today).
+ */
+async function setSymbolImage(imgId, symbolCode, dateStr) {
   const imgElem = document.getElementById(imgId);
   if (!imgElem) return;
 
+  // If symbolCode is blank, default to clearsky
   if (!symbolCode) {
     imgElem.src = 'images/weathericons/svg/clearsky_day.svg';
     return;
   }
-  let base = symbolCode
-    .replace('_day','')
-    .replace('_night','')
-    .replace('_polartwilight','');
 
-  imgElem.src = `images/weathericons/svg/${base}.svg`;
+  // Normalize the "base" symbol by removing day/night/polartwilight
+  const base = symbolCode
+    .replace('_day', '')
+    .replace('_night', '')
+    .replace('_polartwilight', '');
+
+  // 1) Fetch sunrise/sunset data
+  //    (If dateStr is missing, you might default to today's date.)
+  const today = dateStr || new Date().toISOString().slice(0, 10);
+  let sunData;
+  try {
+    const res = await fetch(`/api/sun?date=${today}`);
+    sunData = await res.json();
+  } catch (err) {
+    console.error("Error fetching /api/sun data:", err);
+    // Fallback to base icon if fetch fails
+    imgElem.src = `images/weathericons/svg/${base}.svg`;
+    return;
+  }
+
+  // 2) Extract sunrise/sunset from sunData
+  //    Check for validity in case "No local data" was returned
+  const sunriseStr = sunData?.properties?.sunrise?.time;
+  const sunsetStr  = sunData?.properties?.sunset?.time;
+  if (!sunriseStr || !sunsetStr) {
+    // No sunrise/sunset data found, just default to base
+    imgElem.src = `images/weathericons/svg/${base}.svg`;
+    return;
+  }
+
+  const sunriseTime = new Date(sunriseStr);
+  const sunsetTime  = new Date(sunsetStr);
+  const now         = new Date();
+
+  // 3) Decide if it's day or night
+  //    (Simple check: day if now between sunrise & sunset, else night)
+  const isDaytime = (now >= sunriseTime && now < sunsetTime);
+
+  // 4) Attempt a "day" or "night" icon
+  const dayOrNight = isDaytime ? 'day' : 'night';
+  const candidateIcon = `images/weathericons/svg/${base}_${dayOrNight}.svg`;
+
+  // 5) Check if the candidate icon actually exists
+  //    We'll do a HEAD request: if response.ok => it exists
+  let iconExists = false;
+  try {
+    const headRes = await fetch(candidateIcon, { method: 'HEAD' });
+    iconExists = headRes.ok;  // true if the file is found
+  } catch (error) {
+    // If an error occurs (e.g. network error), just treat as if it doesn't exist
+    console.warn("HEAD request failed for", candidateIcon, error);
+  }
+
+  // 6) Pick final path based on existence
+  const finalIconPath = iconExists
+    ? candidateIcon
+    : `images/weathericons/svg/${base}.svg`;
+
+  // 7) Set <img> src
+  imgElem.src = finalIconPath;
 }
 
 function buildForecastTable(timeseries) {
