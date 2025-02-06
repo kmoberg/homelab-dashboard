@@ -1,5 +1,6 @@
 docker-compose.yml
 .env
+data/airportDb.json
 
 
 
@@ -204,3 +205,4 @@ cython_debug/
 #.idea/
 
 /docker-compose.yml
+!/data/airportDb.json
