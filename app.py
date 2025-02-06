@@ -18,10 +18,15 @@ import requests
 from flask import Flask, send_from_directory, request, jsonify
 from influxdb_client import InfluxDBClient
 from airport_cache import get_airport_coords, get_airport_data
+from aircraft_cache import (
+    get_all_aircraft,
+    get_aircraft_by_reg,
+    create_or_update_aircraft,
+    delete_aircraft
+)
 
 # Get environment variables from .env file
 from dotenv import load_dotenv
-
 
 # Create Flask app
 app = Flask(__name__, static_folder='public', static_url_path='')
@@ -30,7 +35,6 @@ app = Flask(__name__, static_folder='public', static_url_path='')
 # Example structure: [{ "date": "2025-01-01", "sunrise": "08:47", "sunset": "16:11" }, ...]
 with open('sun_data.json', 'r', encoding='utf-8') as f:
     SUN_DATA = json.load(f)
-
 
 # APP SETUP
 APP_NAME = os.getenv("APP_NAME")
@@ -56,6 +60,7 @@ influx_client = InfluxDBClient(
 )
 query_api = influx_client.query_api()
 
+
 # ------------------------------------------------------
 # 1. Serve the front-end (index.html) from public/
 # ------------------------------------------------------
@@ -63,6 +68,7 @@ query_api = influx_client.query_api()
 def index():
     # Serve index.html at root
     return send_from_directory('public', 'index.html')
+
 
 # If you have other static assets (CSS, JS, images),
 # Flask can serve them automatically if you place them in `public/`.
@@ -118,6 +124,7 @@ def api_weather():
 
     except requests.RequestException as e:
         return jsonify({"error": str(e)}), 500
+
 
 # ------------------------------------------------------
 # 3. /api/prices -> hvakosterstrommen.no
@@ -221,6 +228,7 @@ def compute_average_price(price_data):
     # e.g. return round(avg * 100, 1) for øre
     return round(avg * 100, 1)  # e.g. "42.3" meaning 42.3 øre
 
+
 # ------------------------------------------------------
 # 4. /api/sun -> local sunrise/sunset from sun_data.json
 #    e.g. GET /api/sun?date=2025-01-24
@@ -249,9 +257,10 @@ def api_sun():
         "properties": {
             "date": found["date"],
             "sunrise": {"time": f"{found['date']}T{found['sunrise']}:00+01:00"},
-            "sunset":  {"time": f"{found['date']}T{found['sunset']}:00+01:00"}
+            "sunset": {"time": f"{found['date']}T{found['sunset']}:00+01:00"}
         }
     }
+
 
 # ------------------------------------------------------
 # 5. /api/influx -> Query InfluxDB for weather data
@@ -406,6 +415,7 @@ def compute_altim_trend(points):
     else:
         return "steady"
 
+
 @app.route("/api/metars")
 def api_metars():
     """
@@ -429,7 +439,7 @@ def api_metars():
     try:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()  # raise exception if not 2xx
-        data = resp.json()       # parse JSON array
+        data = resp.json()  # parse JSON array
         # data is a list of dictionaries, one per station
 
         # Optionally, you can transform or filter out fields you don’t need.
@@ -449,6 +459,7 @@ def api_metars():
 
     except requests.RequestException as e:
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/distance")
 def api_distance():
@@ -478,6 +489,8 @@ def api_distance():
         "airportPos": [coords["lat"], coords["lon"]],
         "distanceNm": round(dist_nm, 1)
     })
+
+
 def distance_nm(lat1, lon1, lat2, lon2):
     # same formula as your code
     import math
@@ -485,13 +498,14 @@ def distance_nm(lat1, lon1, lat2, lon2):
     toRad = math.pi / 180.0
     dLat = (lat2 - lat1) * toRad
     dLon = (lon2 - lon1) * toRad
-    a = (math.sin(dLat/2) ** 2
-         + math.cos(lat1*toRad) * math.cos(lat2*toRad)
-         * math.sin(dLon/2) ** 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    a = (math.sin(dLat / 2) ** 2
+         + math.cos(lat1 * toRad) * math.cos(lat2 * toRad)
+         * math.sin(dLon / 2) ** 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     dist_km = R * c
     dist_nm = dist_km / 1.852
     return dist_nm
+
 
 # ------------------------------------------------------
 # 6. /api/airport/<icao> -> Full station record
@@ -522,7 +536,7 @@ def api_airport_iata(icao):
     if not station:
         return jsonify({"error": f"No station data found for {icao}"}), 404
 
-    iata = station.get("iata", "N/A")   # might be missing
+    iata = station.get("iata", "N/A")  # might be missing
     return jsonify({"icao": icao.upper(), "iata": iata})
 
 
@@ -559,6 +573,97 @@ def api_airport_location(icao):
         "lat": lat,
         "lon": lon
     })
+
+
+# ------------------------------------------------------
+# 7. /api/aircraft endpoints (CRUD)
+# ------------------------------------------------------
+
+@app.route("/api/aircraft", methods=["GET"])
+def api_list_aircraft():
+    """
+    GET /api/aircraft
+    Return all aircraft in the local DB (dictionary).
+    """
+    all_aircraft = get_all_aircraft()
+    # If you want a list of records, transform the dict
+    # or just return the dict. We'll do a list:
+    records = list(all_aircraft.values())
+    return jsonify({"count": len(records), "aircraft": records})
+
+
+@app.route("/api/aircraft", methods=["POST"])
+def api_create_aircraft():
+    """
+    POST /api/aircraft
+    Body JSON example:
+    {
+      "registration": "N123AB",
+      "icao24": "A0B1C2",
+      "selcal": "AB-CD",
+      ...
+    }
+    Creates (or updates) an aircraft record in local DB.
+    """
+    data = request.json
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
+
+    ok, msg = create_or_update_aircraft(data)
+    if not ok:
+        return jsonify({"error": msg}), 400
+    return jsonify({"status": msg})
+
+
+@app.route("/api/aircraft/<reg>", methods=["GET"])
+def api_get_aircraft(reg):
+    """
+    GET /api/aircraft/<reg>
+    Return the aircraft record if found, else 404.
+    """
+    record = get_aircraft_by_reg(reg)
+    if not record:
+        return jsonify({"error": f"No aircraft found for {reg}"}), 404
+    return jsonify(record)
+
+
+@app.route("/api/aircraft/<reg>", methods=["PUT"])
+def api_update_aircraft(reg):
+    """
+    PUT /api/aircraft/<reg>
+    Similar to POST, but specifically updates an existing record or creates if not exist.
+    We also cross-check that body 'registration' matches URL param, or handle accordingly.
+    """
+    data = request.json
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
+
+    # Ensure the JSON 'registration' matches URL param if you want that logic enforced:
+    # This is optional, depends how you want the API to behave
+    body_reg = data.get("registration", "").upper().strip()
+    if body_reg and body_reg != reg.upper().strip():
+        return jsonify({"error": "Registration mismatch between URL and JSON body"}), 400
+
+    # Force data["registration"] to be the URL param if missing
+    data["registration"] = reg.upper().strip()
+
+    ok, msg = create_or_update_aircraft(data)
+    if not ok:
+        return jsonify({"error": msg}), 400
+    return jsonify({"status": msg})
+
+
+@app.route("/api/aircraft/<reg>", methods=["DELETE"])
+def api_delete_aircraft(reg):
+    """
+    DELETE /api/aircraft/<reg>
+    Deletes the record if it exists.
+    """
+    success = delete_aircraft(reg)
+    if success:
+        return jsonify({"status": f"Aircraft {reg} deleted."})
+    else:
+        return jsonify({"error": f"No aircraft found for {reg}"}), 404
 
 
 # ------------------------------------------------------
