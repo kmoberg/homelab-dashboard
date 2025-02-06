@@ -441,10 +441,20 @@ async function fetchEnzvData() {
     }
     const { current, history, trend } = data;
 
-    smoothTextUpdate(
-      document.getElementById('enzv-pressure'),
-      current.altim_hpa != null ? current.altim_hpa.toFixed(1) : '--'
-    );
+    // 1) Build a pressure string with both hPa and inHg
+    let pressureStr = '--';
+    if (current.altim_hpa != null && current.altim_in_hg != null) {
+      // e.g. "1013.2 hPa - 29.91 inHg"
+      pressureStr = `${current.altim_hpa.toFixed(1)} hPa - ` +
+                    `${current.altim_in_hg.toFixed(2)} inHg`;
+    } else if (current.altim_hpa != null) {
+      // if only hPa is available
+      pressureStr = `${current.altim_hpa.toFixed(1)} hPa`;
+    }
+
+    smoothTextUpdate(document.getElementById('enzv-pressure'), pressureStr);
+
+    // 2) Temperature, dewpoint, etc. remain the same
     smoothTextUpdate(
       document.getElementById('enzv-temp'),
       current.temp_c != null ? current.temp_c.toFixed(1) : '--'
@@ -466,12 +476,14 @@ async function fetchEnzvData() {
     }
     smoothTextUpdate(document.getElementById('enzv-wind'), windStr);
 
+    // 3) Trend arrow
     const arrowEl = document.getElementById('enzv-trend-arrow');
     arrowEl.classList.remove('bi-arrow-up', 'bi-arrow-down', 'bi-dash');
     if (trend === 'up') arrowEl.classList.add('bi-arrow-up');
     else if (trend === 'down') arrowEl.classList.add('bi-arrow-down');
     else arrowEl.classList.add('bi-dash');
 
+    // 4) Build chart
     buildEnzvPressureChart(history);
   } catch (err) {
     console.error('Error fetching /api/enzv:', err);
