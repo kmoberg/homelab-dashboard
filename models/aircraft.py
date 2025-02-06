@@ -1,6 +1,8 @@
 # models/aircraft.py
 import json
 from db import db
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.types import Date
 
 class Aircraft(db.Model):
     """
@@ -25,45 +27,23 @@ class Aircraft(db.Model):
     model         = db.Column(db.String(50), nullable=True)  # e.g. "A321-253NX"
     construction_number = db.Column(db.Integer, nullable=True)  # "cn": 9541
     test_reg      = db.Column(db.String(20), nullable=True)  # "testreg": "D-AVZA"
-    delivery_date = db.Column(db.String(20), nullable=True)  # "delivery": "2020.10.15" as string
+    delivery_date = db.Column(Date, nullable=True)  # "delivery": "2020.10.15" as string
 
     # We'll store 'remarks' array and 'previous-reg' object in JSON format
-    remarks_json      = db.Column(db.Text, nullable=True)   # text column, we'll store JSON
-    previous_reg_json = db.Column(db.Text, nullable=True)   # text column, we'll store JSON
+    remarks_json      = db.Column(JSONB, nullable=True)   # text column, we'll store JSON
+    previous_reg_json = db.Column(JSONB, nullable=True)   # text column, we'll store JSON
 
     def to_dict(self):
         """
         Convert the DB fields into a Python dictionary. We'll parse
         the JSON fields back to Python objects if present.
         """
-        data = {
-            "registration": self.registration,
-            "icao24": self.icao24,
-            "selcal": self.selcal,
-            "type": self.ac_type,
-            "operator": self.operator,
-            "serial_number": self.serial_number,
-            "year_built": self.year_built,
-            "status": self.status,
-            "name": self.name,
-            "engines": self.engines,
-            "model": self.model,
-            "cn": self.construction_number,
-            "testreg": self.test_reg,
-            "delivery": self.delivery_date,
-        }
+        data = {"registration": self.registration, "icao24": self.icao24, "selcal": self.selcal, "type": self.ac_type,
+                "operator": self.operator, "serial_number": self.serial_number, "year_built": self.year_built,
+                "status": self.status, "name": self.name, "engines": self.engines, "model": self.model,
+                "cn": self.construction_number, "testreg": self.test_reg, "delivery": self.delivery_date,
+                "remarks": self.remarks_json, "previous-reg": self.previous_reg_json}
 
         # Parse JSON fields if they exist
-        if self.remarks_json:
-            try:
-                data["remarks"] = json.loads(self.remarks_json)
-            except:
-                data["remarks"] = None
-
-        if self.previous_reg_json:
-            try:
-                data["previous-reg"] = json.loads(self.previous_reg_json)
-            except:
-                data["previous-reg"] = None
 
         return data
