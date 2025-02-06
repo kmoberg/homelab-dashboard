@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  homelab-dashboard:
+    build: .
+    container_name: homelab_dashboard
+    volumes:
+      - "./data:/app/data"
+    ports:
+      - "3000:3000"
+    environment:
+      INFLUX_URL: "http://influxdb:8086"
+      INFLUX_API_TOKEN: "your_token_here"
+      INFLUX_ORG: "myorg"
+      INFLUX_BUCKET: "mybucket"
+      CONTACT_EMAIL: "your_email_here"
+      APP_NAME: "HomelabDashboard"
+      APP_VERSION: "1.0.0"
+      CHECKWX_API_KEY: "your_key_here"
+
+volumes:
+  airport-data:
+    # Docker named volume (no extra config needed)
