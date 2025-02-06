@@ -164,3 +164,52 @@ def fetch_station_data_checkwx(icao: str):
     except requests.RequestException as e:
         print(f"[airport_routes] CheckWX error: {e}")
         return None
+
+
+def fetch_or_get_airport_coords(icao: str) -> dict | None:
+    """
+    Return {"lat": float, "lon": float} for the given ICAO.
+    1) Check if the Airport exists in DB. If so, return lat/lon if not None.
+    2) If not in DB, fetch from CheckWX, store in DB, then return lat/lon.
+    3) If can't fetch or no lat/lon, return None.
+    """
+    icao = icao.strip().upper()
+    ap = Airport.query.get(icao)
+    if ap:
+        # If we already have an airport, ensure lat/lon is present.
+        if ap.latitude is not None and ap.longitude is not None:
+            return {"lat": ap.latitude, "lon": ap.longitude}
+        # If we have the airport but lat/lon is missing, we might want to re-fetch or just return None
+        # For simplicity, let's just return None here
+        return None
+
+    # Not in DB => fetch from CheckWX
+    station_data = fetch_station_data_checkwx(icao)
+    if not station_data:
+        return None
+
+    lat = station_data.get("latitude", {}).get("decimal")
+    lon = station_data.get("longitude", {}).get("decimal")
+    if lat is None or lon is None:
+        return None
+
+    city = station_data.get("city", "")
+    country_obj = station_data.get("country", {})
+    country_name = country_obj.get("name", "")
+    iata = station_data.get("iata", "")
+    name = station_data.get("name", "")
+
+    new_ap = Airport(
+        icao=icao,
+        iata=iata,
+        name=name,
+        city=city,
+        country=country_name,
+        latitude=lat,
+        longitude=lon,
+        details=station_data
+    )
+    db.session.add(new_ap)
+    db.session.commit()
+
+    return {"lat": lat, "lon": lon}

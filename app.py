@@ -26,6 +26,8 @@ from models.airport import Airport
 from routes.aircraft_routes import aircraft_bp
 from routes.airport_routes import airport_bp
 
+from routes.airport_routes import fetch_or_get_airport_coords
+
 
 
 
@@ -480,25 +482,6 @@ def api_metars():
         return jsonify({"error": str(e)}), 500
 
 
-def fetch_or_get_airport_coords(icao: str):
-    """
-    Returns {"lat": float, "lon": float} if known,
-    or None if not found (and we choose not to auto-fetch from CheckWX).
-
-    If you want to auto-fetch from CheckWX if missing in DB, you can
-    replicate the logic used in your new airport_routes blueprint,
-    i.e. call fetch_station_data_checkwx() and create a new row.
-    For simplicity, let's just do a 404 if missing.
-    """
-    icao = icao.upper().strip()
-    ap = Airport.query.get(icao)
-    if not ap:
-        return None  # or auto-fetch from CheckWX if you want
-    if ap.latitude is None or ap.longitude is None:
-        return None
-    return {"lat": ap.latitude, "lon": ap.longitude}
-
-
 @app.route("/api/distance")
 def api_distance():
     icao = request.args.get("icao", "ENGM")
@@ -512,9 +495,10 @@ def api_distance():
         print(err_msg)
         return jsonify({"error": err_msg}), 400
 
-    coords = fetch_or_get_airport_coords(icao)  # our new function
+    # Attempt to get or fetch coordinates from the DB
+    coords = fetch_or_get_airport_coords(icao)
     if not coords:
-        err_msg = f"[/api/distance] No coords found in DB for {icao}"
+        err_msg = f"[/api/distance] Could not retrieve coords for {icao}"
         print(err_msg)
         return jsonify({"error": err_msg}), 404
 
