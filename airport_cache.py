@@ -37,39 +37,31 @@ def _save_db():
     except Exception as e:
         print(f"[airport_cache] Error writing airportDb.json: {e}")
 
-def _fetch_coords_from_checkwx(icao: str):
+def _fetch_station_data(icao: str):
     """
     Queries CheckWX's station endpoint:
       GET https://api.checkwx.com/station/{icao}
-    with header "X-API-Key: <your key>"
+    Header: X-API-Key: <your key>
 
-    JSON example:
+    Example station JSON in data["data"][0]:
     {
-      "results": 1,
-      "data": [{
-        "icao": "KLAX",
-        "latitude": {
-          "decimal": 33.942501,
-          ...
-        },
-        "longitude": {
-          "decimal": -118.407997,
-          ...
-        },
-        "geometry": {
-          "coordinates": [ -118.407997, 33.942501 ],
-          "type": "Point"
-        },
+      "icao": "KLAX",
+      "latitude":  { "decimal": 33.942501, ... },
+      "longitude": { "decimal": -118.407997, ... },
+      "geometry": {
+        "coordinates": [ -118.407997, 33.942501 ],
         ...
-      }]
+      },
+      ...
     }
-    Returns dict {"lat": float, "lon": float} or None if not found/fetch failed.
+
+    Returns the 'first' station dict or None if not found/fetch failed.
     """
     url = f"https://api.checkwx.com/station/{icao}"
     headers = {"X-API-Key": CHECKWX_API_KEY}
 
     masked_key = (CHECKWX_API_KEY[:4] + "****") if CHECKWX_API_KEY else "(None)"
-    print(f"[airport_cache] _fetch_coords_from_checkwx: icao={icao}, URL={url}, KEY={masked_key}")
+    print(f"[airport_cache] _fetch_station_data: icao={icao}, URL={url}, KEY={masked_key}")
 
     try:
         resp = requests.get(url, headers=headers, timeout=10)
@@ -84,50 +76,46 @@ def _fetch_coords_from_checkwx(icao: str):
             print(f"[airport_cache]  No 'data' array returned for ICAO={icao}. Full JSON = {data}")
             return None
 
-        first = arr[0]
-        lat = first.get("latitude", {}).get("decimal")
-        lon = first.get("longitude", {}).get("decimal")
-
-        # Alternatively, you could parse geometry.coordinates
-        # coords = first.get("geometry", {}).get("coordinates", [])
-        # if coords and len(coords) == 2:
-        #     lon, lat = coords
-
-        if lat is None or lon is None:
-            print(f"[airport_cache]  No lat/lon in record for {icao}. Record = {first}")
-            return None
-
-        print(f"[airport_cache]  => Found lat={lat}, lon={lon} for {icao}")
-        return {"lat": lat, "lon": lon}
-
+        first_station = arr[0]
+        return first_station  # We'll store this entire record
     except requests.RequestException as e:
         print(f"[airport_cache]  CheckWX API call failed for {icao}: {e}")
         return None
 
 def get_airport_coords(icao: str):
     """
-    Main function to get lat/lon from local DB or fetch from CheckWX if missing.
+    Main function to retrieve lat/lon from local DB or from CheckWX if missing.
     Returns dict {"lat": float, "lon": float} or None if not found/fetch failed.
+
+    Now we store the entire station record from CheckWX in _airport_db[icao],
+    but only return lat/lon to the caller. (You can expand this in your code.)
     """
     global _airport_db
     icao = icao.upper().strip()
     print(f"[airport_cache] get_airport_coords called for {icao}")
 
     if icao in _airport_db:
-        print(f"[airport_cache]  Found {icao} in local DB: {_airport_db[icao]}")
-        return _airport_db[icao]
-
-    print(f"[airport_cache]  {icao} not in local DB; querying CheckWX.")
-    coords = _fetch_coords_from_checkwx(icao)
-
-    if coords:
-        _airport_db[icao] = coords
-        _save_db()
-        print(f"[airport_cache]  => Stored new coords for {icao}: {coords}")
+        print(f"[airport_cache]  Found {icao} in local DB")
+        station = _airport_db[icao]
     else:
-        print(f"[airport_cache]  => Could NOT find coords for {icao} (None returned)")
+        print(f"[airport_cache]  {icao} not in local DB; querying CheckWX.")
+        station = _fetch_station_data(icao)
+        if station:
+            _airport_db[icao] = station
+            _save_db()
+            print(f"[airport_cache]  => Stored new station record for {icao}")
+        else:
+            print(f"[airport_cache]  => Could NOT find station for {icao} (None returned)")
+            return None
 
-    return coords
+    # Extract lat/lon from the station record
+    lat = station.get("latitude", {}).get("decimal")
+    lon = station.get("longitude", {}).get("decimal")
+    if lat is None or lon is None:
+        print(f"[airport_cache]  Missing lat/lon in stored record for {icao}.")
+        return None
+
+    return {"lat": lat, "lon": lon}
 
 # Load DB upon module import
 _load_db()
