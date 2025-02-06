@@ -117,5 +117,33 @@ def get_airport_coords(icao: str):
 
     return {"lat": lat, "lon": lon}
 
+def get_airport_data(icao: str):
+    """
+    Returns the entire station record for the given ICAO
+    from the local DB or CheckWX if missing.
+    Example keys: 'icao', 'iata', 'city', 'country', 'latitude', 'longitude', 'geometry', etc.
+    If not found, returns None.
+    """
+    global _airport_db
+    icao = icao.upper().strip()
+    print(f"[airport_cache] get_airport_data called for {icao}")
+
+    # If we already have it, return it
+    if icao in _airport_db:
+        print(f"[airport_cache]  Found {icao} in local DB")
+        return _airport_db[icao]
+
+    print(f"[airport_cache]  {icao} not in local DB; querying CheckWX.")
+    station = _fetch_station_data(icao)  # the function that calls /station/<icao>
+    if station:
+        _airport_db[icao] = station
+        _save_db()
+        print(f"[airport_cache]  => Stored new station record for {icao}")
+    else:
+        print(f"[airport_cache]  => Could NOT find station for {icao} (None returned)")
+        return None
+
+    return station
+
 # Load DB upon module import
 _load_db()

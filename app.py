@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, date
 import requests
 from flask import Flask, send_from_directory, request, jsonify
 from influxdb_client import InfluxDBClient
-from airport_cache import get_airport_coords
+from airport_cache import get_airport_coords, get_airport_data
 
 # Get environment variables from .env file
 from dotenv import load_dotenv
@@ -492,6 +492,73 @@ def distance_nm(lat1, lon1, lat2, lon2):
     dist_km = R * c
     dist_nm = dist_km / 1.852
     return dist_nm
+
+# ------------------------------------------------------
+# 6. /api/airport/<icao> -> Full station record
+#    /api/airport/<icao>/iata -> Just IATA code
+#    /api/airport/<icao>/location -> Basic location info
+# ------------------------------------------------------
+
+@app.route("/api/airport/<icao>")
+def api_airport_full(icao):
+    """
+    Returns the entire station record from local DB or CheckWX if missing.
+    If not found, return 404.
+    """
+    station = get_airport_data(icao)
+    if not station:
+        return jsonify({"error": f"No station data found for {icao}"}), 404
+    # Return the full object exactly as stored
+    return jsonify(station)
+
+
+@app.route("/api/airport/<icao>/iata")
+def api_airport_iata(icao):
+    """
+    Returns just the IATA code (and ICAO) for the given airport.
+    Example JSON: { "icao": "KLAX", "iata": "LAX" }
+    """
+    station = get_airport_data(icao)
+    if not station:
+        return jsonify({"error": f"No station data found for {icao}"}), 404
+
+    iata = station.get("iata", "N/A")   # might be missing
+    return jsonify({"icao": icao.upper(), "iata": iata})
+
+
+@app.route("/api/airport/<icao>/location")
+def api_airport_location(icao):
+    """
+    Returns location info: city, country, lat, lon, etc.
+    Example JSON:
+    {
+      "icao": "KLAX",
+      "city": "Los Angeles",
+      "country": "United States",
+      "lat": 33.942501,
+      "lon": -118.407997
+    }
+    """
+    station = get_airport_data(icao)
+    if not station:
+        return jsonify({"error": f"No station data found for {icao}"}), 404
+
+    # Some fields might be missing for certain airports. Use .get() safely.
+    city = station.get("city", "Unknown")
+    # station["country"] could be a dict { "code": "US", "name": "United States" }
+    country_obj = station.get("country", {})
+    country_name = country_obj.get("name", "Unknown")
+
+    lat = station.get("latitude", {}).get("decimal")
+    lon = station.get("longitude", {}).get("decimal")
+
+    return jsonify({
+        "icao": icao.upper(),
+        "city": city,
+        "country": country_name,
+        "lat": lat,
+        "lon": lon
+    })
 
 
 # ------------------------------------------------------
