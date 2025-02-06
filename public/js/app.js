@@ -511,7 +511,7 @@ function buildEnzvPressureChart(history) {
       // Add "elements.line.tension" or "cubicInterpolationMode"
       elements: {
         line: {
-          tension: 0.4 // smooth the curve
+          tension: 0.6 // smooth the curve
           // OR cubicInterpolationMode: 'monotone'
         }
       },
