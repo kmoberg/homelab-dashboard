@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, date
 import requests
 
 from flask import Flask, send_from_directory, request, jsonify
+from flask_migrate import Migrate
 
 from influxdb_client import InfluxDBClient
 from airport_cache import get_airport_coords, get_airport_data
@@ -40,7 +41,9 @@ app = init_db_uri(app)  # Initialize the SQLite database
 
 db.init_app(app)  # Bind the SQLAlchemy db to the Flask app
 with app.app_context():
-    db.create_all()  # Create the tables if they don't exist
+    migrate = Migrate(app, db)
+
+    # db.create_all()  # Create the tables if they don't exist
 
 
 ###############################
