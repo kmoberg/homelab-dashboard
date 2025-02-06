@@ -489,8 +489,10 @@ function buildEnzvPressureChart(history) {
     labels.push(`${hh}:${mm}`);
     values.push(pt.altim_hpa);
   });
+
   const ctx = document.getElementById('enzvPressureChart').getContext('2d');
-  if (enzvChart) enzvChart.destroy();
+  if (enzvChart) enzvChart.destroy(); // if you re-create the chart frequently
+
   enzvChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -498,21 +500,36 @@ function buildEnzvPressureChart(history) {
       datasets: [{
         label: 'Pressure (hPa)',
         data: values,
-        borderColor: 'rgba(99,132,255,1)',
-        backgroundColor: 'rgba(99,132,255,0.2)',
+        borderColor: 'rgba(99, 132, 255, 1)',
+        backgroundColor: 'rgba(99, 132, 255, 0.2)',
         fill: true
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      // Add "elements.line.tension" or "cubicInterpolationMode"
+      elements: {
+        line: {
+          tension: 0.4 // smooth the curve
+          // OR cubicInterpolationMode: 'monotone'
+        }
+      },
       scales: {
         y: {
           beginAtZero: false,
-          title: { display: true, text: 'hPa' }
+          title: { display: true, text: 'hPa' },
+          // Force tick labels to be whole numbers
+          ticks: {
+            callback: function(value) {
+              return Math.round(value);
+            }
+          }
         }
       },
-      plugins: { legend: { display: false } }
+      plugins: {
+        legend: { display: false }
+      }
     }
   });
 }

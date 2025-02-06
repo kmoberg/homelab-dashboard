@@ -319,7 +319,7 @@ def api_enzv():
         # We'll filter for each _field we want, then pivot so each row has all fields.
         flux_query = f"""
         from(bucket: "{INFLUX_BUCKET}")
-          |> range(start: -6h)
+          |> range(start: -24h)
           |> filter(fn: (r) => r["_measurement"] == "metar")
           |> filter(fn: (r) => r["station_id"] == "ENZV")
           |> filter(fn: (r) =>
