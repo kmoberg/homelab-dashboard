@@ -724,18 +724,16 @@ async function fetchVatsimStats() {
   const aircraftTbody = document.querySelector('#vatsim-aircraft-table tbody');
   const trackedTbody  = document.querySelector('#vatsim-airport-table tbody');
 
-  const myCard        = document.getElementById('my-vatsim-card');
-  const myCallsignEl  = document.getElementById('my-callsign');
-  const myAircraftEl  = document.getElementById('my-aircraft');
-  const myDepEl       = document.getElementById('my-dep');
-  const myArrEl       = document.getElementById('my-arr');
-  const myAltEl       = document.getElementById('my-altitude');
-  const myDistEl      = document.getElementById('my-dist-remaining');
-  const myETEEl       = document.getElementById('my-ete');
+// Get required elements from the DOM.
+  const myCard = document.getElementById('my-vatsim-card');
+  const myCallsignEl = document.getElementById('my-callsign');
+  const myAircraftSummaryEl = document.getElementById('my-aircraft-summary');
+  const myAltEl = document.getElementById('my-altitude');
+  const myDistEl = document.getElementById('my-dist-remaining');
+  const myETEEl = document.getElementById('my-ete');
 
-  // Check that all required elements exist
-  if (!myCard || !myCallsignEl || !myAircraftEl || !myDepEl ||
-      !myArrEl || !myAltEl || !myDistEl || !myETEEl) {
+  // Check that the essential elements exist.
+  if (!myCard || !myCallsignEl || !myAircraftSummaryEl || !myAltEl || !myDistEl || !myETEEl) {
     console.error("VATSIM status elements are missing from the DOM.");
     return;
   }
@@ -837,21 +835,20 @@ async function fetchVatsimStats() {
     const alt = myPilot.altitude || 0;
     const remarks = plan.remarks || "";
 
-    // Update basic fields using our helper function (which checks for null)
+    // Update the callsign and summary
     smoothTextUpdate(myCallsignEl, cSign);
-    smoothTextUpdate(myAircraftEl, acft);
-    smoothTextUpdate(myDepEl, dep);
-    smoothTextUpdate(myArrEl, arr);
+    // Build a summary string (e.g., "Aircraft: A321 | Route: ENGM → ENZV")
+    const summaryStr = `Aircraft: ${acft} | Route: ${dep} → ${arr}`;
+    smoothTextUpdate(myAircraftSummaryEl, summaryStr);
     smoothTextUpdate(myAltEl, alt.toString());
 
-    // --- Extract Aircraft Registration from Flightplan Remarks ---
-    // Look for a pattern "REG/XXXX" in the remarks (case-insensitive)
+    // Extract aircraft registration from flight plan remarks
     const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
     if (regMatch) {
       const foundReg = regMatch[1].toUpperCase();
       console.log("Detected registration in remarks:", foundReg);
 
-      // Call /api/aircraft/<foundReg> to get the aircraft details
+      // Fetch aircraft details from your aircraft API
       fetch(`/api/aircraft/${foundReg}`)
         .then(r => {
           if (!r.ok) {
@@ -861,7 +858,6 @@ async function fetchVatsimStats() {
         })
         .then(acData => {
           console.log("Fetched aircraft data:", acData);
-          // Display aircraft details in the dedicated card
           showMyAircraftRegBox(acData);
         })
         .catch(err => {
@@ -869,14 +865,12 @@ async function fetchVatsimStats() {
           document.getElementById('my-aircraft-reg-card').style.display = 'none';
         });
     } else {
-      // Hide aircraft details card if no registration found in remarks
       document.getElementById('my-aircraft-reg-card').style.display = 'none';
     }
 
-    // --- Distance & ETE Calculation & Progress Bar Update ---
+    // Distance and ETE calculations and progress bar update:
     let distRemaining = '--';
     let eteString = '--';
-
     if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
       const arrKey = arr.trim().toUpperCase();
       const pilotLat = myPilot.latitude;
@@ -888,7 +882,6 @@ async function fetchVatsimStats() {
             console.warn('Distance error:', distData.error);
             return;
           }
-          // distData.distanceNm is the computed distance remaining
           const d = distData.distanceNm;
           distRemaining = d.toFixed(0);
           smoothTextUpdate(myDistEl, distRemaining);
@@ -905,8 +898,8 @@ async function fetchVatsimStats() {
             smoothTextUpdate(myETEEl, '--');
           }
 
-          // --- Update the Progress Bar ---
-          // Assume the flight plan has a total_distance field in nm.
+          // Update the progress bar.
+          // Assume the flight plan contains a total_distance field (in nm).
           const totalDistance = plan.total_distance || 300; // default to 300 nm if not provided
           updateDistanceProgress(d, totalDistance);
         })
@@ -923,7 +916,7 @@ async function fetchVatsimStats() {
   }
 }
 
-// ----- Helper: Show Aircraft Details Card -----
+// ----- Helper: Display Aircraft Details in the Detailed Aircraft Card -----
 function showMyAircraftRegBox(acData) {
   // Helper to update a table row: if value exists, set it; otherwise, hide the row.
   function updateRow(rowId, cellId, value) {
@@ -958,10 +951,9 @@ function showMyAircraftRegBox(acData) {
   document.getElementById('my-aircraft-reg-card').style.display = 'block';
 }
 
-// ----- Helper: Update Progress Bar -----
+// ----- Helper: Update the Progress Bar -----
 function updateDistanceProgress(currentDist, totalDist) {
   if (!totalDist || totalDist <= 0) return;
-  // Calculate percentage completed: (1 - (currentDist/totalDist)) * 100
   const progressPercent = Math.max(0, Math.min(100, (1 - (currentDist / totalDist)) * 100));
   const progressBar = document.getElementById('distance-progress-bar');
   if (progressBar) {
