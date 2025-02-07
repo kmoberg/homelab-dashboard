@@ -109,28 +109,63 @@
   </div>
 
   <!-- Airport Weather Card (ENZV) -->
-  <div class="card large" id="enzv-card">
-    <h2><i class="bi bi-airplane"></i> Airport (ENZV)</h2>
-    <p>
-      <strong>Pressure:</strong>
-      <span id="enzv-pressure" class="fade"></span>
-      <i class="bi" id="enzv-trend-arrow"></i>
-    </p>
-    <p><strong>Temp:</strong> <span id="enzv-temp" class="fade">--</span> °C</p>
-    <p><strong>Dew Pt:</strong> <span id="enzv-dew" class="fade">--</span> °C</p>
-    <p><strong>Visibility:</strong> <span id="enzv-vis" class="fade">--</span> mi</p>
-    <p><strong>Wind:</strong> <span id="enzv-wind" class="fade">--</span></p>
+<div class="card large" id="enzv-card">
+  <h2><i class="bi bi-airplane"></i> Airport (ENZV)</h2>
 
-    <div style="width: 90%; max-width: 600px;">
-      <canvas id="enzvPressureChart" class="fade"></canvas>
-    </div>
+  <!-- A table to style the airport stats -->
+  <table id="enzv-stats-table" class="fade custom-table">
+    <thead>
+      <tr>
+        <th>Parameter</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pressure</td>
+        <td>
+          <span id="enzv-pressure" class="fade">--</span>
+          <i class="bi" id="enzv-trend-arrow"></i>
+        </td>
+      </tr>
+      <tr>
+        <td>Temperature</td>
+        <td>
+          <span id="enzv-temp" class="fade">--</span> °C
+        </td>
+      </tr>
+      <tr>
+        <td>Dew Pt</td>
+        <td>
+          <span id="enzv-dew" class="fade">--</span> °C
+        </td>
+      </tr>
+      <tr>
+        <td>Visibility</td>
+        <td>
+          <span id="enzv-vis" class="fade">--</span> mi
+        </td>
+      </tr>
+      <tr>
+        <td>Wind</td>
+        <td>
+          <span id="enzv-wind" class="fade">--</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-    <hr />
-<h3>Raw METARs</h3>
-<div id="metar-container" style="display: grid; row-gap: 0.5em;">
-  <!-- We'll fill this container via JS -->
-</div>
+  <!-- Then your pressure chart below -->
+  <div style="width: 90%; max-width: 600px; margin-top: 1em;">
+    <canvas id="enzvPressureChart" class="fade"></canvas>
   </div>
+
+  <hr />
+  <h3>Raw METARs</h3>
+  <div id="metar-container" style="display: grid; row-gap: 0.5em;">
+    <!-- We'll fill this container via JS -->
+  </div>
+</div>
 
 <!-- My personal VATSIM status box -->
 <div class="card" id="my-vatsim-card" style="display:none;">
