@@ -733,6 +733,13 @@ async function fetchVatsimStats() {
   const myDistEl      = document.getElementById('my-dist-remaining');
   const myETEEl       = document.getElementById('my-ete');
 
+  // Check that all required elements exist
+  if (!myCard || !myCallsignEl || !myAircraftEl || !myDepEl ||
+      !myArrEl || !myAltEl || !myDistEl || !myETEEl) {
+    console.error("VATSIM status elements are missing from the DOM.");
+    return;
+  }
+
   try {
     const resp = await fetch(VATSIM_DATA_URL);
     if (!resp.ok) {
@@ -819,117 +826,120 @@ async function fetchVatsimStats() {
     const myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
     if (!myPilot) {
       myCard.style.display = 'none';
+      return;
+    }
+    myCard.style.display = 'block';
+    const plan = myPilot.flight_plan || {};
+    const cSign = myPilot.callsign || '??';
+    const acft = plan.aircraft || '--';
+    const dep = plan.departure || '--';
+    const arr = plan.arrival || '--';
+    const alt = myPilot.altitude || 0;
+    const remarks = plan.remarks || "";
+
+    // Update basic fields using our helper function (which checks for null)
+    smoothTextUpdate(myCallsignEl, cSign);
+    smoothTextUpdate(myAircraftEl, acft);
+    smoothTextUpdate(myDepEl, dep);
+    smoothTextUpdate(myArrEl, arr);
+    smoothTextUpdate(myAltEl, alt.toString());
+
+    // --- Extract Aircraft Registration from Flightplan Remarks ---
+    // Look for a pattern "REG/XXXX" in the remarks (case-insensitive)
+    const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
+    if (regMatch) {
+      const foundReg = regMatch[1].toUpperCase();
+      console.log("Detected registration in remarks:", foundReg);
+
+      // Call /api/aircraft/<foundReg> to get the aircraft details
+      fetch(`/api/aircraft/${foundReg}`)
+        .then(r => {
+          if (!r.ok) {
+            throw new Error(`Aircraft not found or error: ${r.status}`);
+          }
+          return r.json();
+        })
+        .then(acData => {
+          console.log("Fetched aircraft data:", acData);
+          // Display aircraft details in the dedicated card
+          showMyAircraftRegBox(acData);
+        })
+        .catch(err => {
+          console.warn("No aircraft details for", foundReg, err);
+          document.getElementById('my-aircraft-reg-card').style.display = 'none';
+        });
     } else {
-      myCard.style.display = 'block';
-      const plan  = myPilot.flight_plan || {};
-      const cSign = myPilot.callsign || '??';
-      const acft  = plan.aircraft || '--';
-      const dep   = plan.departure || '--';
-      const arr   = plan.arrival || '--';
-      const alt   = myPilot.altitude || 0;
-      const remarks = plan.remarks || "";
-
-
-      smoothTextUpdate(myCallsignEl, cSign);
-      smoothTextUpdate(myAircraftEl, acft);
-      smoothTextUpdate(myDepEl, dep);
-      smoothTextUpdate(myArrEl, arr);
-      smoothTextUpdate(myAltEl, alt.toString());
-
-      // 2) Look for a pattern "REG/XXXX"
-//    We'll do a simple regex: /REG\/([A-Za-z0-9-]+)/i
-//    This should capture "REG/SE-DMO" => Group 1: "SE-DMO"
-const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
-if (regMatch) {
-  const foundReg = regMatch[1].toUpperCase();
-  console.log("Detected registration in remarks:", foundReg);
-
-  // 3) Call /api/aircraft/<foundReg> to get the info
-  fetch(`/api/aircraft/${foundReg}`)
-    .then(r => {
-      if (!r.ok) {
-        throw new Error(`Aircraft not found or error: ${r.status}`);
-      }
-      return r.json();
-    })
-    .then(acData => {
-      console.log("Fetched aircraft data:", acData);
-      // 4) Display it in our #my-aircraft-reg-card box
-      showMyAircraftRegBox(acData);
-    })
-    .catch(err => {
-      console.warn("No aircraft details for", foundReg, err);
-      // Optionally hide the box if we fail
+      // Hide aircraft details card if no registration found in remarks
       document.getElementById('my-aircraft-reg-card').style.display = 'none';
-    });
-} else {
-  // If no "REG/" found in remarks, hide the card
-  document.getElementById('my-aircraft-reg-card').style.display = 'none';
-}
-
-      let distRemaining = '--';
-      let eteString     = '--';
-
-      // If we have a valid arrival and pilot lat/lon, call /api/distance
-      if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
-        const arrKey = arr.trim().toUpperCase();
-        const lat    = myPilot.latitude;
-        const lon    = myPilot.longitude;
-        fetch(`/api/distance?icao=${arrKey}&lat=${lat}&lon=${lon}`)
-          .then(r => r.json())
-          .then(distData => {
-            if (distData.error) {
-              console.warn('Distance error:', distData.error);
-              return;
-            }
-            // distData.distanceNm is the computed distance
-            const d = distData.distanceNm; // number
-            distRemaining = d.toFixed(0);
-            smoothTextUpdate(myDistEl, distRemaining);
-
-            // ETE if groundspeed > 0
-            const gs = myPilot.groundspeed || 0;
-            if (gs > 0 && d > 1) {
-              const hours = d / gs;
-              const hh = Math.floor(hours);
-              const mm = Math.floor((hours - hh) * 60);
-              eteString = `${hh}h ${mm}m`;
-              smoothTextUpdate(myETEEl, eteString);
-            } else {
-              smoothTextUpdate(myETEEl, '--');
-            }
-          })
-          .catch(err => {
-            console.error('Distance fetch failed', err);
-          });
-      } else {
-        // If arrival is invalid or lat/lon missing
-        smoothTextUpdate(myDistEl, '--');
-        smoothTextUpdate(myETEEl, '--');
-      }
     }
 
+    // --- Distance & ETE Calculation & Progress Bar Update ---
+    let distRemaining = '--';
+    let eteString = '--';
+
+    if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
+      const arrKey = arr.trim().toUpperCase();
+      const pilotLat = myPilot.latitude;
+      const pilotLon = myPilot.longitude;
+      fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
+        .then(r => r.json())
+        .then(distData => {
+          if (distData.error) {
+            console.warn('Distance error:', distData.error);
+            return;
+          }
+          // distData.distanceNm is the computed distance remaining
+          const d = distData.distanceNm;
+          distRemaining = d.toFixed(0);
+          smoothTextUpdate(myDistEl, distRemaining);
+
+          // Calculate ETE if groundspeed > 0
+          const gs = myPilot.groundspeed || 0;
+          if (gs > 0 && d > 1) {
+            const hours = d / gs;
+            const hh = Math.floor(hours);
+            const mm = Math.floor((hours - hh) * 60);
+            eteString = `${hh}h ${mm}m`;
+            smoothTextUpdate(myETEEl, eteString);
+          } else {
+            smoothTextUpdate(myETEEl, '--');
+          }
+
+          // --- Update the Progress Bar ---
+          // Assume the flight plan has a total_distance field in nm.
+          const totalDistance = plan.total_distance || 300; // default to 300 nm if not provided
+          updateDistanceProgress(d, totalDistance);
+        })
+        .catch(err => {
+          console.error('Distance fetch failed', err);
+        });
+    } else {
+      smoothTextUpdate(myDistEl, '--');
+      smoothTextUpdate(myETEEl, '--');
+    }
   } catch (err) {
     console.error('Error fetching VATSIM stats:', err);
-    document.getElementById('my-vatsim-card').style.display = 'none';
+    myCard.style.display = 'none';
   }
 }
 
+// ----- Helper: Show Aircraft Details Card -----
 function showMyAircraftRegBox(acData) {
   // Helper to update a table row: if value exists, set it; otherwise, hide the row.
   function updateRow(rowId, cellId, value) {
     const row = document.getElementById(rowId);
-    if (value && value.trim() !== "" && value !== "--") {
-      document.getElementById(cellId).textContent = value;
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
+    if (row) {
+      if (value && value.toString().trim() !== "" && value !== "--") {
+        document.getElementById(cellId).textContent = value;
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
     }
   }
 
   updateRow('row-reg-registration', 'reg-registration', acData.registration || '');
   updateRow('row-reg-icao24', 'reg-icao24', acData.icao24 || '');
-  // Use either acData.type or acData.ac_type
   updateRow('row-reg-type', 'reg-type', acData.type || acData.ac_type || '');
   updateRow('row-reg-operator', 'reg-operator', acData.operator || '');
   updateRow('row-reg-model', 'reg-model', acData.model || '');
@@ -937,7 +947,6 @@ function showMyAircraftRegBox(acData) {
   updateRow('row-reg-engines', 'reg-engines', acData.engines || '');
   updateRow('row-reg-status', 'reg-status', acData.status || '');
 
-  // For remarks, if it’s an array then join them, else show as is.
   let remarksVal = '--';
   if (Array.isArray(acData.remarks)) {
     remarksVal = acData.remarks.join('\n');
@@ -946,20 +955,18 @@ function showMyAircraftRegBox(acData) {
   }
   updateRow('row-reg-remarks', 'reg-remarks', remarksVal);
 
-  // Finally, show the entire aircraft details card.
   document.getElementById('my-aircraft-reg-card').style.display = 'block';
 }
 
+// ----- Helper: Update Progress Bar -----
 function updateDistanceProgress(currentDist, totalDist) {
-  // Calculate the percentage completed.
-  // If totalDist is 0 or not available, do nothing.
   if (!totalDist || totalDist <= 0) return;
-  // Progress = (1 - (currentDist / totalDist)) * 100
+  // Calculate percentage completed: (1 - (currentDist/totalDist)) * 100
   const progressPercent = Math.max(0, Math.min(100, (1 - (currentDist / totalDist)) * 100));
-
-  // Update the width of the progress bar fill.
   const progressBar = document.getElementById('distance-progress-bar');
-  progressBar.style.width = progressPercent + '%';
+  if (progressBar) {
+    progressBar.style.width = progressPercent + '%';
+  }
 }
 
 // ==========================
