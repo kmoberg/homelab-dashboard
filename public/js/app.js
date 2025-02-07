@@ -833,6 +833,7 @@ async function fetchVatsimStats() {
     const arr = plan.arrival || '--';
     const alt = myPilot.altitude || 0;
     const remarks = plan.remarks || "";
+    const acftShort = plan.aircraft_short || acft;
 
     // Update the callsign and summary
     smoothTextUpdate(myCallsignEl, cSign);
@@ -842,7 +843,7 @@ async function fetchVatsimStats() {
     const myDepEl = document.getElementById('my-dep');           // Departure element
     // Check that the elements exist before updating
 if (myAircraftEl && myDestEl && myDepEl) {
-  smoothTextUpdate(myAircraftEl, acft);      // Update aircraft
+  smoothTextUpdate(myAircraftEl, acftShort);      // Update aircraft
     smoothTextUpdate(myDepEl, dep);            // Update departure
     smoothTextUpdate(myDestEl, arr);           // Update
 } else {
