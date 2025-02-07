@@ -837,10 +837,17 @@ async function fetchVatsimStats() {
 
     // Update the callsign and summary
     smoothTextUpdate(myCallsignEl, cSign);
-    // Build a summary string (e.g., "Aircraft: A321 | Route: ENGM → ENZV")
-    const summaryStr = `Aircraft: ${acft} | Route: ${dep} → ${arr}`;
-    smoothTextUpdate(myAircraftSummaryEl, summaryStr);
-    smoothTextUpdate(myAltEl, alt.toString());
+    const myAircraftEl = document.getElementById('my-aircraft'); // Aircraft element
+const myRouteEl = document.getElementById('my-route');       // Route element
+    // Check that the elements exist before updating
+if (myAircraftEl && myRouteEl) {
+  smoothTextUpdate(myAircraftEl, acft);      // Update aircraft
+  smoothTextUpdate(myRouteEl, `${dep} → ${arr}`); // Update route
+} else {
+  console.warn("Aircraft or Route element missing from the DOM.");
+}
+
+smoothTextUpdate(myAltEl, alt.toString());
 
     // Extract aircraft registration from flight plan remarks
     const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
