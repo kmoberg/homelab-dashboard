@@ -271,12 +271,15 @@ hr {
   text-align: center;
 }
 .highlighted-callsign {
-  font-size: 3.5rem; /* Make the callsign bigger */
-  color: #ffcc00; /* Keep the highlight color */
-  text-align: center;
-  display: block; /* Ensures it takes up full width */
+  font-size: 3.5rem; /* Make it larger */
+  color: #ffcc00; /* Highlight color */
   font-weight: bold;
-  margin: 10px auto; /* Centers it properly */
+  margin: 10px 0; /* Adjust spacing */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Ensure it's truly centered */
+  gap: 10px; /* Add space between icon and text */
 }
 
 #my-aircraft-summary {
