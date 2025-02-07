@@ -837,13 +837,16 @@ async function fetchVatsimStats() {
     // Update the callsign and summary
     smoothTextUpdate(myCallsignEl, cSign);
     const myAircraftEl = document.getElementById('my-aircraft'); // Aircraft element
-const myRouteEl = document.getElementById('my-route');       // Route element
+    const myRouteEl = document.getElementById('my-route');       // Route element
+    const myDestEl = document.getElementById('my-dest');         // Destination element
+    const myDepEl = document.getElementById('my-dep');           // Departure element
     // Check that the elements exist before updating
-if (myAircraftEl && myRouteEl) {
+if (myAircraftEl && myDestEl && myDepEl) {
   smoothTextUpdate(myAircraftEl, acft);      // Update aircraft
-  smoothTextUpdate(myRouteEl, `${dep} → ${arr}`); // Update route
+    smoothTextUpdate(myDepEl, dep);            // Update departure
+    smoothTextUpdate(myDestEl, arr);           // Update
 } else {
-  console.warn("Aircraft or Route element missing from the DOM.");
+  console.warn("Aircraft or Route element(s) missing from the DOM.");
 }
 
 smoothTextUpdate(myAltEl, alt.toString());
