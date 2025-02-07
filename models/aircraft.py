@@ -26,9 +26,9 @@ class Aircraft(db.Model):
 
     # Relationships
     aircraft_type = db.relationship(
-        "AircraftType", backref="aircraft_list", lazy=True
-    )
-    operator = db.relationship("Airline", backref="aircraft_list", lazy=True)
+        "AircraftType", backref="aircraft_list", lazy="joined"
+    )  # Renamed backref to avoid conflict
+    operator = db.relationship("Airline", backref="aircraft_list", lazy="joined")
 
     def to_dict(self):
         return {
