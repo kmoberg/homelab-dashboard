@@ -22,9 +22,16 @@ from dotenv import load_dotenv
 from db import db, init_db_uri
 
 from models.airport import Airport
+from models.aircraft_type import AircraftType
+from models.airline import Airline
+from models.airline_hub import AirlineHub
+from models.aircraft import Aircraft
 
 from routes.aircraft_routes import aircraft_bp
 from routes.airport_routes import airport_bp
+
+from routes.aircraft_type_routes import aircraft_type_bp
+from routes.airline_routes import airline_bp
 
 from routes.airport_routes import fetch_or_get_airport_coords
 
@@ -51,6 +58,8 @@ with app.app_context():
 # Now all routes in `aircraft_bp` are available under /api/aircraft
 app.register_blueprint(aircraft_bp, url_prefix="/api/aircraft")
 app.register_blueprint(airport_bp, url_prefix="/api/airport")
+app.register_blueprint(aircraft_type_bp, url_prefix="/api/aircraft_types")
+app.register_blueprint(airline_bp, url_prefix="/api/airlines")
 
 # Load your pre-fetched sunrise/sunset data from local JSON
 # Example structure: [{ "date": "2025-01-01", "sunrise": "08:47", "sunset": "16:11" }, ...]
