@@ -1,7 +1,7 @@
-# models/aircraft.py
 from db import db
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.types import Date
+
 
 class Aircraft(db.Model):
     """
@@ -25,7 +25,9 @@ class Aircraft(db.Model):
     previous_reg_json = db.Column(JSONB, nullable=True)
 
     # Relationships
-    aircraft_type = db.relationship("AircraftType", backref="aircraft", lazy=True)
+    aircraft_type = db.relationship(
+        "AircraftType", backref="aircraft_list", lazy=True
+    )
     operator = db.relationship("Airline", backref="aircraft", lazy=True)
 
     def to_dict(self):
@@ -44,6 +46,19 @@ class Aircraft(db.Model):
             "delivery_date": self.delivery_date,
             "remarks": self.remarks_json,
             "previous_reg": self.previous_reg_json,
-            "aircraft_type": self.aircraft_type.to_dict() if self.aircraft_type else None,
-            "operator": self.operator.to_dict() if self.operator else None,
+            "aircraft_type": {
+                "id": self.aircraft_type.id,
+                "type_code": self.aircraft_type.type_code,
+                "manufacturer": self.aircraft_type.manufacturer,
+                "model_name": self.aircraft_type.model_name,
+                "engines": self.aircraft_type.engines,
+                "description": self.aircraft_type.description,
+            } if self.aircraft_type else None,
+            "operator": {
+                "id": self.operator.id,
+                "icao_code": self.operator.icao_code,
+                "iata_code": self.operator.iata_code,
+                "name": self.operator.name,
+                "country": self.operator.country,
+            } if self.operator else None,
         }
