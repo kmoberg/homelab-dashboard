@@ -158,41 +158,40 @@
 </div>
 
   <!-- My personal VATSIM status box -->
-  <div class="card" id="my-vatsim-card" style="display:none;">
-    <div>
-      <h2>My VATSIM Status</h2>
-      <p><strong>Callsign:</strong> <span id="my-callsign">--</span></p>
-      <p><strong>Aircraft:</strong> <span id="my-aircraft">--</span></p>
-      <p><strong>Route:</strong>
-        <span id="my-dep">???</span>
-        <i class="bi bi-arrow-right"></i>
-        <span id="my-arr">???</span>
-      </p>
-      <p><strong>Altitude:</strong> <span id="my-altitude">--</span></p>
-      <p><strong>Remaining:</strong>
-        <span id="my-dist-remaining">--</span> nm /
-        <span id="my-ete">--</span>
-      </p>
-    </div>
-
-
-    <!-- New Box for Detailed Aircraft Info (registration) -->
-    <div id="my-aircraft-reg-card" style="display:none;">
-      <h2>My Aircraft Details</h2>
-      <p><strong>Registration:</strong> <span id="reg-registration">--</span></p>
-      <p><strong>ICAO24:</strong> <span id="reg-icao24">--</span></p>
-      <p><strong>Type:</strong> <span id="reg-type">--</span></p>
-      <p><strong>Operator:</strong> <span id="reg-operator">--</span></p>
-      <p><strong>Model:</strong> <span id="reg-model">--</span></p>
-      <p><strong>Name:</strong> <span id="reg-name">--</span></p>
-      <p><strong>Engines:</strong> <span id="reg-engines">--</span></p>
-      <p><strong>Status:</strong> <span id="reg-status">--</span></p>
-      <div>
-        <strong>Remarks:</strong>
-        <pre id="reg-remarks" style="white-space: pre-wrap;">--</pre>
-      </div>
-    </div>
+<div class="card" id="my-vatsim-card" style="display:none;">
+  <div class="vatsim-status-header">
+    <h2 id="my-callsign" class="highlighted-callsign">--</h2>
+    <p id="my-aircraft-summary">Aircraft: -- | Route: ??? → ???</p>
   </div>
+  <div class="vatsim-status-body">
+    <p><strong>Altitude:</strong> <span id="my-altitude">--</span></p>
+    <p><strong>Distance Remaining:</strong> <span id="my-dist-remaining">--</span> nm</p>
+    <p><strong>ETE:</strong> <span id="my-ete">--</span></p>
+  </div>
+  <!-- Progress Bar: a container and a filling div -->
+  <div class="progress-bar-container">
+    <div id="distance-progress-bar" class="progress-bar-fill"></div>
+  </div>
+</div>
+
+<!-- New Box for Detailed Aircraft Info (registration) -->
+<div class="card" id="my-aircraft-reg-card" style="display:none;">
+  <h2>My Aircraft Details</h2>
+  <table class="custom-table">
+    <tbody>
+      <!-- We only display rows for fields that are non-empty -->
+      <tr id="row-reg-registration"><td><strong>Registration:</strong></td><td id="reg-registration">--</td></tr>
+      <tr id="row-reg-icao24"><td><strong>ICAO24:</strong></td><td id="reg-icao24">--</td></tr>
+      <tr id="row-reg-type"><td><strong>Type:</strong></td><td id="reg-type">--</td></tr>
+      <tr id="row-reg-operator"><td><strong>Operator:</strong></td><td id="reg-operator">--</td></tr>
+      <tr id="row-reg-model"><td><strong>Model:</strong></td><td id="reg-model">--</td></tr>
+      <tr id="row-reg-name"><td><strong>Name:</strong></td><td id="reg-name">--</td></tr>
+      <tr id="row-reg-engines"><td><strong>Engines:</strong></td><td id="reg-engines">--</td></tr>
+      <tr id="row-reg-status"><td><strong>Status:</strong></td><td id="reg-status">--</td></tr>
+      <tr id="row-reg-remarks"><td><strong>Remarks:</strong></td><td><pre id="reg-remarks" style="white-space: pre-wrap; margin:0;">--</pre></td></tr>
+    </tbody>
+  </table>
+</div>
 
   <!-- VATSIM Stats Card -->
 <div class="card" id="vatsim-card">

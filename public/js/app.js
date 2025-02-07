@@ -916,27 +916,50 @@ if (regMatch) {
 }
 
 function showMyAircraftRegBox(acData) {
-  // Fill in the placeholders
-  document.getElementById('reg-registration').textContent = acData.registration || '--';
-  document.getElementById('reg-icao24').textContent = acData.icao24 || '--';
-  document.getElementById('reg-type').textContent = acData.type || acData.ac_type || '--';
-  document.getElementById('reg-operator').textContent = acData.operator || '--';
-  document.getElementById('reg-model').textContent = acData.model || '--';
-  document.getElementById('reg-name').textContent = acData.name || '--';
-  document.getElementById('reg-engines').textContent = acData.engines || '--';
-  document.getElementById('reg-status').textContent = acData.status || '--';
-
-  // If remarks is an array or object, you might want to format it differently
-  if (Array.isArray(acData.remarks)) {
-    document.getElementById('reg-remarks').textContent = acData.remarks.join('\n');
-  } else if (acData.remarks) {
-    document.getElementById('reg-remarks').textContent = JSON.stringify(acData.remarks, null, 2);
-  } else {
-    document.getElementById('reg-remarks').textContent = '--';
+  // Helper to update a table row: if value exists, set it; otherwise, hide the row.
+  function updateRow(rowId, cellId, value) {
+    const row = document.getElementById(rowId);
+    if (value && value.trim() !== "" && value !== "--") {
+      document.getElementById(cellId).textContent = value;
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
   }
 
-  // Show the card
+  updateRow('row-reg-registration', 'reg-registration', acData.registration || '');
+  updateRow('row-reg-icao24', 'reg-icao24', acData.icao24 || '');
+  // Use either acData.type or acData.ac_type
+  updateRow('row-reg-type', 'reg-type', acData.type || acData.ac_type || '');
+  updateRow('row-reg-operator', 'reg-operator', acData.operator || '');
+  updateRow('row-reg-model', 'reg-model', acData.model || '');
+  updateRow('row-reg-name', 'reg-name', acData.name || '');
+  updateRow('row-reg-engines', 'reg-engines', acData.engines || '');
+  updateRow('row-reg-status', 'reg-status', acData.status || '');
+
+  // For remarks, if it’s an array then join them, else show as is.
+  let remarksVal = '--';
+  if (Array.isArray(acData.remarks)) {
+    remarksVal = acData.remarks.join('\n');
+  } else if (acData.remarks) {
+    remarksVal = acData.remarks;
+  }
+  updateRow('row-reg-remarks', 'reg-remarks', remarksVal);
+
+  // Finally, show the entire aircraft details card.
   document.getElementById('my-aircraft-reg-card').style.display = 'block';
+}
+
+function updateDistanceProgress(currentDist, totalDist) {
+  // Calculate the percentage completed.
+  // If totalDist is 0 or not available, do nothing.
+  if (!totalDist || totalDist <= 0) return;
+  // Progress = (1 - (currentDist / totalDist)) * 100
+  const progressPercent = Math.max(0, Math.min(100, (1 - (currentDist / totalDist)) * 100));
+
+  // Update the width of the progress bar fill.
+  const progressBar = document.getElementById('distance-progress-bar');
+  progressBar.style.width = progressPercent + '%';
 }
 
 // ==========================
