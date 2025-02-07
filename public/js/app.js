@@ -827,12 +827,45 @@ async function fetchVatsimStats() {
       const dep   = plan.departure || '--';
       const arr   = plan.arrival || '--';
       const alt   = myPilot.altitude || 0;
+      const remarks = plan.remarks || "";
+
 
       smoothTextUpdate(myCallsignEl, cSign);
       smoothTextUpdate(myAircraftEl, acft);
       smoothTextUpdate(myDepEl, dep);
       smoothTextUpdate(myArrEl, arr);
       smoothTextUpdate(myAltEl, alt.toString());
+
+      // 2) Look for a pattern "REG/XXXX"
+//    We'll do a simple regex: /REG\/([A-Za-z0-9-]+)/i
+//    This should capture "REG/SE-DMO" => Group 1: "SE-DMO"
+const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
+if (regMatch) {
+  const foundReg = regMatch[1].toUpperCase();
+  console.log("Detected registration in remarks:", foundReg);
+
+  // 3) Call /api/aircraft/<foundReg> to get the info
+  fetch(`/api/aircraft/${foundReg}`)
+    .then(r => {
+      if (!r.ok) {
+        throw new Error(`Aircraft not found or error: ${r.status}`);
+      }
+      return r.json();
+    })
+    .then(acData => {
+      console.log("Fetched aircraft data:", acData);
+      // 4) Display it in our #my-aircraft-reg-card box
+      showMyAircraftRegBox(acData);
+    })
+    .catch(err => {
+      console.warn("No aircraft details for", foundReg, err);
+      // Optionally hide the box if we fail
+      document.getElementById('my-aircraft-reg-card').style.display = 'none';
+    });
+} else {
+  // If no "REG/" found in remarks, hide the card
+  document.getElementById('my-aircraft-reg-card').style.display = 'none';
+}
 
       let distRemaining = '--';
       let eteString     = '--';
@@ -880,6 +913,30 @@ async function fetchVatsimStats() {
     console.error('Error fetching VATSIM stats:', err);
     document.getElementById('my-vatsim-card').style.display = 'none';
   }
+}
+
+function showMyAircraftRegBox(acData) {
+  // Fill in the placeholders
+  document.getElementById('reg-registration').textContent = acData.registration || '--';
+  document.getElementById('reg-icao24').textContent = acData.icao24 || '--';
+  document.getElementById('reg-type').textContent = acData.type || acData.ac_type || '--';
+  document.getElementById('reg-operator').textContent = acData.operator || '--';
+  document.getElementById('reg-model').textContent = acData.model || '--';
+  document.getElementById('reg-name').textContent = acData.name || '--';
+  document.getElementById('reg-engines').textContent = acData.engines || '--';
+  document.getElementById('reg-status').textContent = acData.status || '--';
+
+  // If remarks is an array or object, you might want to format it differently
+  if (Array.isArray(acData.remarks)) {
+    document.getElementById('reg-remarks').textContent = acData.remarks.join('\n');
+  } else if (acData.remarks) {
+    document.getElementById('reg-remarks').textContent = JSON.stringify(acData.remarks, null, 2);
+  } else {
+    document.getElementById('reg-remarks').textContent = '--';
+  }
+
+  // Show the card
+  document.getElementById('my-aircraft-reg-card').style.display = 'block';
 }
 
 // ==========================
