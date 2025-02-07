@@ -99,18 +99,17 @@ def create_aircraft():
     return jsonify({"status": f"Created aircraft {reg}"}), 201
 
 
-@aircraft_bp.route("/<registration>", methods=["GET"])
-def get_aircraft(registration):
+@aircraft_bp.route("/<reg>", methods=["GET"])
+def get_aircraft(reg):
     """
-    GET /api/aircraft/<registration>
-    :param registration:
-    :return:
+    GET /api/aircraft/<reg>
+    Returns the aircraft record if found, else 404.
     """
-    aircraft = Aircraft.query.filter_by(registration=registration).first()
-    if not aircraft:
-        return jsonify({"error": "Aircraft not found"}), 404
-
-    return jsonify(aircraft.to_dict())
+    key = reg.strip().upper()
+    ac = Aircraft.query.get(key)
+    if not ac:
+        return jsonify({"error": f"No aircraft found for {key}"}), 404
+    return jsonify(ac.to_dict())
 
 
 @aircraft_bp.route("/<reg>", methods=["PUT"])
