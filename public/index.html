@@ -172,16 +172,14 @@
   <div class="progress-bar-container">
     <div id="distance-progress-bar" class="progress-bar-fill"></div>
   </div>
-</div>
-
-<!-- New Box for Detailed Aircraft Info (registration) -->
-<div class="card" id="my-aircraft-reg-card" style="display:none;">
+<div id="my-aircraft-reg-card" style="display:none;">
   <h2>My Aircraft Details</h2>
   <table class="custom-table">
     <tbody>
       <!-- We only display rows for fields that are non-empty -->
       <tr id="row-reg-registration"><td><strong>Registration:</strong></td><td id="reg-registration">--</td></tr>
       <tr id="row-reg-icao24"><td><strong>ICAO24:</strong></td><td id="reg-icao24">--</td></tr>
+      <tr id="row-reg-selcal"><td><strong>SELCAL:</strong></td><td id="reg-selcal">--</td></tr>
       <tr id="row-reg-type"><td><strong>Type:</strong></td><td id="reg-type">--</td></tr>
       <tr id="row-reg-operator"><td><strong>Operator:</strong></td><td id="reg-operator">--</td></tr>
       <tr id="row-reg-model"><td><strong>Model:</strong></td><td id="reg-model">--</td></tr>
@@ -191,6 +189,7 @@
       <tr id="row-reg-remarks"><td><strong>Remarks:</strong></td><td><pre id="reg-remarks" style="white-space: pre-wrap; margin:0;">--</pre></td></tr>
     </tbody>
   </table>
+</div>
 </div>
 
   <!-- VATSIM Stats Card -->

@@ -933,6 +933,7 @@ function showMyAircraftRegBox(acData) {
 
   updateRow('row-reg-registration', 'reg-registration', acData.registration || '');
   updateRow('row-reg-icao24', 'reg-icao24', acData.icao24 || '');
+  updateRow('row-reg-selcal', 'reg-selcal', acData.selcal || '');
   updateRow('row-reg-type', 'reg-type', acData.type || acData.ac_type || '');
   updateRow('row-reg-operator', 'reg-operator', acData.operator || '');
   updateRow('row-reg-model', 'reg-model', acData.model || '');
