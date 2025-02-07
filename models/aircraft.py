@@ -24,6 +24,10 @@ class Aircraft(db.Model):
     remarks_json = db.Column(JSONB, nullable=True)
     previous_reg_json = db.Column(JSONB, nullable=True)
 
+    # Relationships
+    aircraft_type = db.relationship("AircraftType", backref="aircraft", lazy=True)
+    operator = db.relationship("Airline", backref="aircraft", lazy=True)
+
     def to_dict(self):
         return {
             "registration": self.registration,
@@ -40,4 +44,6 @@ class Aircraft(db.Model):
             "delivery_date": self.delivery_date,
             "remarks": self.remarks_json,
             "previous_reg": self.previous_reg_json,
+            "aircraft_type": self.aircraft_type.to_dict() if self.aircraft_type else None,
+            "operator": self.operator.to_dict() if self.operator else None,
         }

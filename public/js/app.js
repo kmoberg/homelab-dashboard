@@ -945,10 +945,10 @@ function showMyAircraftRegBox(acData) {
   updateRow('row-reg-icao24', 'reg-icao24', acData.icao24 || '');
   updateRow('row-reg-selcal', 'reg-selcal', acData.selcal || '');
   updateRow('row-reg-type', 'reg-type', acData.type || acData.ac_type || '');
-  updateRow('row-reg-operator', 'reg-operator', acData.operator || '');
+  updateRow('row-reg-operator', 'reg-operator', acData.operator.name || '');
   updateRow('row-reg-model', 'reg-model', acData.model || '');
   updateRow('row-reg-name', 'reg-name', acData.name || '');
-  updateRow('row-reg-engines', 'reg-engines', acData.engines || '');
+  updateRow('row-reg-engines', 'reg-engines', acData.aircraft_type.engines || '');
   updateRow('row-reg-status', 'reg-status', acData.status || '');
 
   let remarksVal = '--';
