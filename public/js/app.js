@@ -727,13 +727,12 @@ async function fetchVatsimStats() {
 // Get required elements from the DOM.
   const myCard = document.getElementById('my-vatsim-card');
   const myCallsignEl = document.getElementById('my-callsign');
-  const myAircraftSummaryEl = document.getElementById('my-aircraft-summary');
   const myAltEl = document.getElementById('my-altitude');
   const myDistEl = document.getElementById('my-dist-remaining');
   const myETEEl = document.getElementById('my-ete');
 
   // Check that the essential elements exist.
-  if (!myCard || !myCallsignEl || !myAircraftSummaryEl || !myAltEl || !myDistEl || !myETEEl) {
+  if (!myCard || !myCallsignEl || !myAltEl || !myDistEl || !myETEEl) {
     console.error("VATSIM status elements are missing from the DOM.");
     return;
   }
