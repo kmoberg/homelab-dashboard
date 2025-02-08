@@ -1,7 +1,7 @@
 from db import db
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.types import Date
-
+from sqlalchemy.ext.hybrid import hybrid_property
 
 class Aircraft(db.Model):
     """
@@ -10,6 +10,7 @@ class Aircraft(db.Model):
     __tablename__ = "aircraft"
 
     registration = db.Column(db.String(20), primary_key=True)
+    normalized_registration = db.Column(db.String(20), unique=True, index=True)
     icao24 = db.Column(db.String(10), nullable=True)
     selcal = db.Column(db.String(10), nullable=True)
     type_id = db.Column(db.Integer, db.ForeignKey("aircraft_type.id"), nullable=False)  # FK to AircraftType
@@ -25,10 +26,14 @@ class Aircraft(db.Model):
     previous_reg_json = db.Column(JSONB, nullable=True)
 
     # Relationships
-    aircraft_type = db.relationship(
-        "AircraftType", backref="aircraft_list", lazy="joined"
-    )  # Renamed backref to avoid conflict
+    aircraft_type = db.relationship("AircraftType", backref="aircraft_list", lazy="joined")
     operator = db.relationship("Airline", backref="aircraft_list", lazy="joined")
+
+    # Derived column for normalized lookup (without dashes)
+    @hybrid_property
+    def normalized_registration(self):
+        """ Returns the registration without dashes for lookup. """
+        return self.registration.replace("-", "") if self.registration else None
 
     def to_dict(self):
         return {
@@ -46,6 +51,7 @@ class Aircraft(db.Model):
             "delivery_date": self.delivery_date,
             "remarks": self.remarks_json,
             "previous_reg": self.previous_reg_json,
+            "normalized_registration": self.normalized_registration,  # Optional
             "aircraft_type": {
                 "id": self.aircraft_type.id,
                 "type_code": self.aircraft_type.type_code,

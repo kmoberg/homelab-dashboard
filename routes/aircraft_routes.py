@@ -73,16 +73,15 @@ def create_aircraft():
 
     ac = Aircraft(
         registration=reg,
+        normalized_registration=reg.replace("-", ""),  # Store normalized version
         icao24=data.get("icao24", ""),
         selcal=data.get("selcal", ""),
-        ac_type=data.get("type", ""),
-        operator=data.get("operator", ""),
+        type_id=data.get("type", ""),
+        operator_id=data.get("operator", ""),
         serial_number=data.get("serial_number", ""),
         year_built=year_built,
         status=data.get("status", ""),
         name=data.get("name", ""),
-        engines=data.get("engines", ""),
-        model=data.get("model", ""),
         construction_number=cn_val,
         test_reg=data.get("testreg", ""),
         delivery_date=data.get("delivery", "")
@@ -104,11 +103,14 @@ def get_aircraft(reg):
     """
     GET /api/aircraft/<reg>
     Returns the aircraft record if found, else 404.
+    Supports looking up registrations without dashes.
     """
-    key = reg.strip().upper()
-    ac = Aircraft.query.get(key)
+    key = reg.strip().upper().replace("-", "")  # Normalize input
+    ac = Aircraft.query.filter(Aircraft.normalized_registration == key).first()
+
     if not ac:
         return jsonify({"error": f"No aircraft found for {key}"}), 404
+
     return jsonify(ac.to_dict())
 
 
