@@ -10,7 +10,7 @@ class Aircraft(db.Model):
     __tablename__ = "aircraft"
 
     registration = db.Column(db.String(20), primary_key=True)
-    normalized_registration = db.Column(db.String(20), unique=True, index=True)
+    normalized_registration = db.Column(db.String(20), unique=True, index=True, nullable=False)  # Explicit DB column
     icao24 = db.Column(db.String(10), nullable=True)
     selcal = db.Column(db.String(10), nullable=True)
     type_id = db.Column(db.Integer, db.ForeignKey("aircraft_type.id"), nullable=False)  # FK to AircraftType
@@ -29,7 +29,7 @@ class Aircraft(db.Model):
     aircraft_type = db.relationship("AircraftType", backref="aircraft_list", lazy="joined")
     operator = db.relationship("Airline", backref="aircraft_list", lazy="joined")
 
-    # Derived column for normalized lookup (without dashes)
+    # Hybrid property for runtime lookup
     @hybrid_property
     def normalized_registration(self):
         """ Returns the registration without dashes for lookup. """
@@ -51,7 +51,7 @@ class Aircraft(db.Model):
             "delivery_date": self.delivery_date,
             "remarks": self.remarks_json,
             "previous_reg": self.previous_reg_json,
-            "normalized_registration": self.normalized_registration,  # Optional
+            "normalized_registration": self.normalized_registration,  # Now stored in DB
             "aircraft_type": {
                 "id": self.aircraft_type.id,
                 "type_code": self.aircraft_type.type_code,
