@@ -323,6 +323,9 @@ async function fetchPrices() {
   try {
     const res = await fetch('/api/prices');
     const data = await res.json();
+    const now = new Date();
+    const currentHour = now.getHours();
+
     if (data.today && data.today.prices) {
       const todayAvg = data.today.average;
       smoothTextUpdate(
@@ -333,8 +336,6 @@ async function fetchPrices() {
       const todayLabels = [];
       const todayValues = [];
       let currentPriceValue = null;
-      const now = new Date();
-      const currentHour = now.getHours();
 
       data.today.prices.forEach(item => {
         const startDate = new Date(item.time_start);
@@ -357,6 +358,7 @@ async function fetchPrices() {
       } else {
         smoothTextUpdate(document.getElementById('current-price'), '--');
       }
+
       createPriceChart('priceChart', todayLabels, todayValues, currentHour);
     }
 
@@ -389,12 +391,15 @@ async function fetchPrices() {
 }
 
 function createPriceChart(canvasId, labels, prices, currentHour) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+
+  // Destroy existing chart before creating a new one
   if (canvasId === 'priceChart' && priceChart) {
     priceChart.destroy();
   } else if (canvasId === 'priceChartTomorrow' && priceChartTomorrow) {
     priceChartTomorrow.destroy();
   }
-  const ctx = document.getElementById(canvasId).getContext('2d');
+
   const chartConfig = {
     type: 'bar',
     data: {
@@ -404,7 +409,7 @@ function createPriceChart(canvasId, labels, prices, currentHour) {
         data: prices,
         backgroundColor: prices.map((p, i) => {
           if (currentHour !== null && i === currentHour) {
-            return 'rgba(255, 99, 132, 0.8)'; // highlight current hour
+            return 'rgba(255, 99, 132, 0.8)'; // Highlight current hour in red
           }
           return 'rgba(99, 132, 255, 0.6)';
         }),
@@ -423,6 +428,8 @@ function createPriceChart(canvasId, labels, prices, currentHour) {
       plugins: { legend: { display: false } }
     }
   };
+
+  // Create the new chart instance
   if (canvasId === 'priceChart') {
     priceChart = new Chart(ctx, chartConfig);
   } else {
@@ -441,20 +448,15 @@ async function fetchEnzvData() {
     }
     const { current, history, trend } = data;
 
-    // 1) Build a pressure string with both hPa and inHg
+    // 1) Update pressure, temp, wind, visibility
     let pressureStr = '--';
     if (current.altim_hpa != null && current.altim_in_hg != null) {
-      // e.g. "1013.2 hPa - 29.91 inHg"
-      pressureStr = `${current.altim_hpa.toFixed(1)} hPa - ` +
-                    `${current.altim_in_hg.toFixed(2)} inHg`;
+      pressureStr = `${current.altim_hpa.toFixed(1)} hPa - ${current.altim_in_hg.toFixed(2)} inHg`;
     } else if (current.altim_hpa != null) {
-      // if only hPa is available
       pressureStr = `${current.altim_hpa.toFixed(1)} hPa`;
     }
-
     smoothTextUpdate(document.getElementById('enzv-pressure'), pressureStr);
 
-    // 2) Temperature, dewpoint, etc. remain the same
     smoothTextUpdate(
       document.getElementById('enzv-temp'),
       current.temp_c != null ? current.temp_c.toFixed(1) : '--'
@@ -476,18 +478,74 @@ async function fetchEnzvData() {
     }
     smoothTextUpdate(document.getElementById('enzv-wind'), windStr);
 
-    // 3) Trend arrow
+    // 2) Update trend arrow
     const arrowEl = document.getElementById('enzv-trend-arrow');
     arrowEl.classList.remove('bi-arrow-up', 'bi-arrow-down', 'bi-dash');
     if (trend === 'up') arrowEl.classList.add('bi-arrow-up');
     else if (trend === 'down') arrowEl.classList.add('bi-arrow-down');
     else arrowEl.classList.add('bi-dash');
 
-    // 4) Build chart
+    // 3) Update the pressure chart dynamically
     buildEnzvPressureChart(history);
+
   } catch (err) {
     console.error('Error fetching /api/enzv:', err);
   }
+}
+
+let enzvChart = null;
+function buildEnzvPressureChart(history) {
+  const labels = [];
+  const values = [];
+  history.forEach(pt => {
+    const dt = new Date(pt.time);
+    const hh = String(dt.getHours()).padStart(2, '0');
+    const mm = String(dt.getMinutes()).padStart(2, '0');
+    labels.push(`${hh}:${mm}`);
+    values.push(pt.altim_hpa);
+  });
+
+  const ctx = document.getElementById('enzvPressureChart').getContext('2d');
+
+  // Destroy existing chart before creating a new one
+  if (enzvChart) enzvChart.destroy();
+
+  enzvChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Pressure (hPa)',
+        data: values,
+        borderColor: 'rgba(99, 132, 255, 1)',
+        backgroundColor: 'rgba(99, 132, 255, 0.2)',
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      elements: {
+        line: {
+          tension: 0.6 // smooth curve
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          title: { display: true, text: 'hPa' },
+          ticks: {
+            callback: function(value) {
+              return Math.round(value);
+            }
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
 }
 
 let enzvChart = null;
@@ -551,6 +609,7 @@ async function fetchMetars() {
   try {
     const res = await fetch('/api/metars');
     const data = await res.json();
+
     data.forEach(m => {
       const icao = m.icaoId?.toLowerCase();
       if (!icao) return;
@@ -559,11 +618,13 @@ async function fetchMetars() {
       if (textElem) {
         smoothTextUpdate(textElem, m.rawOb || '--');
       }
+
       const fr = classifyFlightRules(m);
       const dotElem = document.getElementById(`dot-${icao}`);
       if (dotElem) {
         dotElem.style.backgroundColor = fr.color;
       }
+
       const wspd = m.wspd || 0;
       const windIconElem = document.getElementById(`wind-${icao}`);
       if (windIconElem) {
@@ -583,7 +644,6 @@ async function fetchMetars() {
     console.error('Error fetching METARs:', err);
   }
 }
-
 // 1) Define your list of airports.
 const airportList = ["ENZV", "ENGM", "KJFK", "KLAX", "KORD", "TNCM", "EGLL", "RJAA"];
 
@@ -985,3 +1045,11 @@ fetchVatsimStats();
 
 // Refresh VATSIM every 60 seconds
 setInterval(fetchVatsimStats, 60000);
+setInterval(fetchCurrentWeather, 300000)
+setInterval(fetchPrices, 300000);
+
+// Refresh airport weather data every 5 minutes
+setInterval(fetchEnzvData, 300000);
+
+// Refresh METARs every 5 minutes
+setInterval(fetchMetars, 300000);
