@@ -506,61 +506,6 @@ function buildEnzvPressureChart(history) {
   });
 
   const ctx = document.getElementById('enzvPressureChart').getContext('2d');
-
-  // Destroy existing chart before creating a new one
-  if (enzvChart) enzvChart.destroy();
-
-  enzvChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Pressure (hPa)',
-        data: values,
-        borderColor: 'rgba(99, 132, 255, 1)',
-        backgroundColor: 'rgba(99, 132, 255, 0.2)',
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      elements: {
-        line: {
-          tension: 0.6 // smooth curve
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: false,
-          title: { display: true, text: 'hPa' },
-          ticks: {
-            callback: function(value) {
-              return Math.round(value);
-            }
-          }
-        }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
-}
-
-let enzvChart = null;
-function buildEnzvPressureChart(history) {
-  const labels = [];
-  const values = [];
-  history.forEach(pt => {
-    const dt = new Date(pt.time);
-    const hh = String(dt.getHours()).padStart(2, '0');
-    const mm = String(dt.getMinutes()).padStart(2, '0');
-    labels.push(`${hh}:${mm}`);
-    values.push(pt.altim_hpa);
-  });
-
-  const ctx = document.getElementById('enzvPressureChart').getContext('2d');
   if (enzvChart) enzvChart.destroy(); // if you re-create the chart frequently
 
   enzvChart = new Chart(ctx, {
