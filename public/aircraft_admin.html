@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aircraft Management</title>
+  <!-- Bootstrap Icons (optional) -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+  />
+  <!-- Google Fonts (optional) -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Reuse your existing CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Include our custom JS for this page -->
+  <script src="js/aircraft_admin.js" defer></script>
+</head>
+<body>
+
+<header style="margin-top: 1em;">
+  <h1 style="text-align: center;">
+    <i class="bi bi-airplane"></i> Aircraft Management
+  </h1>
+  <p style="text-align: center;">
+    <a href="index.html" style="color: #fff; text-decoration: underline;">
+      <i class="bi bi-arrow-left-square"></i> Back to Dashboard
+    </a>
+  </p>
+</header>
+
+<hr />
+
+<!-- Container for viewing existing registrations -->
+<div class="card large" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <h2><i class="bi bi-list-ul"></i> Existing Registrations</h2>
+  <table id="registration-table" class="custom-table fade" style="width: 100%; margin-top: 1em;">
+    <thead>
+      <tr>
+        <th>Registration</th>
+        <th>Type</th>
+        <th>Airline</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Filled dynamically via JS -->
+    </tbody>
+  </table>
+</div>
+
+<hr />
+
+<!-- Form to add a new registration -->
+<div class="card large" style="max-width: 1200px; margin: 20px auto; padding: 20px;">
+  <h2><i class="bi bi-plus-circle"></i> Add New Registration</h2>
+  <form id="new-registration-form">
+    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+      <!-- Registration -->
+      <div style="flex: 1 1 250px;">
+        <label for="regInput"><strong>Registration:</strong></label><br/>
+        <input
+          type="text"
+          id="regInput"
+          name="registration"
+          required
+          placeholder="e.g., LN-NGF"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- ICAO24 (optional) -->
+      <div style="flex: 1 1 250px;">
+        <label for="icao24Input"><strong>ICAO24 (hex):</strong></label><br/>
+        <input
+          type="text"
+          id="icao24Input"
+          name="icao24"
+          placeholder="e.g., 47805F"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Aircraft Type dropdown -->
+      <div style="flex: 1 1 250px;">
+        <label for="typeSelect"><strong>Aircraft Type:</strong></label><br/>
+        <select id="typeSelect" name="aircraft_type_id" required style="width: 100%; padding: 8px;">
+          <option value="">-- Select Type --</option>
+          <!-- Populated dynamically with /api/aircraft_type data -->
+        </select>
+      </div>
+
+      <!-- Airline dropdown -->
+      <div style="flex: 1 1 250px;">
+        <label for="airlineSelect"><strong>Airline:</strong></label><br/>
+        <select id="airlineSelect" name="airline_id" required style="width: 100%; padding: 8px;">
+          <option value="">-- Select Airline --</option>
+          <!-- Populated dynamically with /api/airlines data -->
+        </select>
+      </div>
+
+      <!-- Submit Button -->
+      <div style="flex: 1 1 100%; margin-top: 20px;">
+        <button type="submit" style="padding: 10px 20px;">
+          <i class="bi bi-save"></i> Save Registration
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+</body>
+</html>

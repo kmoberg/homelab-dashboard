@@ -12,6 +12,7 @@ class AircraftType(db.Model):
     manufacturer = db.Column(db.String(100), nullable=False)
     model_name = db.Column(db.String(100), nullable=False)
     engines = db.Column(db.String(100), nullable=True)
+    type_designator = db.Column(db.String(10), nullable=True)  # ICAO aircraft code
     description = db.Column(db.Text(), nullable=True)
 
     def to_dict(self):
@@ -21,5 +22,6 @@ class AircraftType(db.Model):
             "manufacturer": self.manufacturer,
             "model_name": self.model_name,
             "engines": self.engines,
+            "type_designator": self.type_code,
             "description": self.description,
         }
