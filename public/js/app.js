@@ -724,19 +724,22 @@ const VATSIM_DATA_URL = 'https://data.vatsim.net/v3/vatsim-data.json';
 const MY_VATSIM_CID = 908962;
 
 async function fetchVatsimStats() {
-  const summaryTbody  = document.querySelector('#vatsim-summary-table tbody');
-  const airportsTbody = document.querySelector('#vatsim-airports-table tbody');
-  const aircraftTbody = document.querySelector('#vatsim-aircraft-table tbody');
-  const trackedTbody  = document.querySelector('#vatsim-airport-table tbody');
-
-// Get required elements from the DOM.
   const myCard = document.getElementById('my-vatsim-card');
   const myCallsignEl = document.getElementById('my-callsign');
   const myAltEl = document.getElementById('my-altitude');
   const myDistEl = document.getElementById('my-dist-remaining');
   const myETEEl = document.getElementById('my-ete');
 
-  // Check that the essential elements exist.
+  // VATSIM Stats elements
+  const totalClientsEl = document.getElementById("vatsim-total-clients");
+  const totalPilotsEl = document.getElementById("vatsim-total-pilots");
+  const totalAtcEl = document.getElementById("vatsim-total-atc");
+
+  const airportsListEl = document.getElementById("vatsim-airports-list");
+  const aircraftListEl = document.getElementById("vatsim-aircraft-list");
+  const favoriteAirportsEl = document.getElementById("vatsim-favorite-airports");
+
+  // Ensure essential elements exist
   if (!myCard || !myCallsignEl || !myAltEl || !myDistEl || !myETEEl) {
     console.error("VATSIM status elements are missing from the DOM.");
     return;
@@ -750,19 +753,17 @@ async function fetchVatsimStats() {
     const data = await resp.json();
     console.log(`[VATSIM Stats] Updated at ${new Date().toLocaleTimeString()}`);
 
+    // Extract global stats
     const totalClients = data.general.connected_clients || 0;
-    const totalPilots  = data.pilots ? data.pilots.length : 0;
-    const totalAtc     = data.controllers ? data.controllers.length : 0;
+    const totalPilots = data.pilots ? data.pilots.length : 0;
+    const totalAtc = data.controllers ? data.controllers.length : 0;
 
-    // 1) VATSIM Summary Table
-    const summaryRows = [
-      `<tr><td>Total Clients</td><td>${totalClients}</td></tr>`,
-      `<tr><td>Pilots</td><td>${totalPilots}</td></tr>`,
-      `<tr><td>Controllers</td><td>${totalAtc}</td></tr>`
-    ];
-    smoothTableUpdate(summaryTbody, summaryRows);
+    // Update VATSIM Summary Stats
+    smoothTextUpdate(totalClientsEl, totalClients);
+    smoothTextUpdate(totalPilotsEl, totalPilots);
+    smoothTextUpdate(totalAtcEl, totalAtc);
 
-    // 2) Most Popular Airports (by departure)
+    // Process Most Popular Airports
     const depMap = {};
     data.pilots.forEach(p => {
       const dep = p.flight_plan?.departure;
@@ -771,15 +772,13 @@ async function fetchVatsimStats() {
         depMap[apt] = (depMap[apt] || 0) + 1;
       }
     });
-    const sortedApts = Object.entries(depMap)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0,5);
-    const airportRows = sortedApts.map(([apt, count]) =>
-        `<tr><td>${apt}</td><td>${count}</td></tr>`
-    );
-    smoothTableUpdate(airportsTbody, airportRows);
+    const sortedApts = Object.entries(depMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    // 3) Most Popular Aircraft
+    airportsListEl.innerHTML = sortedApts.length
+      ? sortedApts.map(([apt, count]) => `<li><strong>${apt}</strong> - ${count} departures</li>`).join("")
+      : "<li>No data available</li>";
+
+    // Process Most Popular Aircraft
     const acftMap = {};
     data.pilots.forEach(p => {
       const short = p.flight_plan?.aircraft_short;
@@ -787,19 +786,18 @@ async function fetchVatsimStats() {
       const fam = getAircraftFamily(short);
       acftMap[fam] = (acftMap[fam] || 0) + 1;
     });
-    const sortedAcft = Object.entries(acftMap)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0,5);
-    const aircraftRows = sortedAcft.map(([fam, c]) =>
-        `<tr><td>${fam}</td><td>${c}</td></tr>`
-    );
-    smoothTableUpdate(aircraftTbody, aircraftRows);
+    const sortedAcft = Object.entries(acftMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    // 4) Favorite Airports
+    aircraftListEl.innerHTML = sortedAcft.length
+      ? sortedAcft.map(([fam, count]) => `<li><strong>${fam}</strong> - ${count} flights</li>`).join("")
+      : "<li>No data available</li>";
+
+    // Process Favorite Airports
     const stats = {};
     trackedAirports.forEach(a => {
-      stats[a.icao] = { icao:a.icao, name:a.name, departures:0, arrivals:0, onGround:0 };
+      stats[a.icao] = { icao: a.icao, name: a.name, departures: 0, arrivals: 0, onGround: 0 };
     });
+
     data.pilots.forEach(pilot => {
       const dep = pilot.flight_plan?.departure?.toUpperCase().trim() || "";
       const arr = pilot.flight_plan?.arrival?.toUpperCase().trim() || "";
@@ -811,20 +809,15 @@ async function fetchVatsimStats() {
         }
       });
     });
-    const favRows = trackedAirports.map(a => {
-      const s = stats[a.icao];
-      return `
-        <tr>
-          <td>${s.icao}</td>
-          <td>${s.departures}</td>
-          <td>${s.arrivals}</td>
-          <td>${s.onGround}</td>
-        </tr>
-      `;
-    });
-    smoothTableUpdate(trackedTbody, favRows);
 
-    // 5) My Personal Pilot Tracking
+    favoriteAirportsEl.innerHTML = trackedAirports.length
+      ? trackedAirports.map(a => {
+          const s = stats[a.icao];
+          return `<li><strong>${s.icao}</strong>: ${s.departures} departures, ${s.arrivals} arrivals</li>`;
+        }).join("")
+      : "<li>No data available</li>";
+
+    // Fetch My Personal VATSIM Data
     const myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
     if (!myPilot) {
       myCard.style.display = 'none';
@@ -832,7 +825,6 @@ async function fetchVatsimStats() {
     }
     myCard.style.display = 'block';
 
-    // Call function to update all tracker details
     updateVatsimTracker(myPilot);
 
     const plan = myPilot.flight_plan || {};
@@ -844,106 +836,62 @@ async function fetchVatsimStats() {
     const remarks = plan.remarks || "";
     const acftShort = plan.aircraft_short || acft;
 
-    // Update the callsign and summary
+    // Update Callsign & Aircraft Details
     smoothTextUpdate(myCallsignEl, cSign);
-    const myAircraftEl = document.getElementById('my-aircraft'); // Aircraft element
-    const myRouteEl = document.getElementById('my-route');       // Route element
-    const myDestEl = document.getElementById('my-dest');         // Destination element
-    const myDepEl = document.getElementById('my-dep');           // Departure element
-    // Check that the elements exist before updating
-    if (myAircraftEl && myDestEl && myDepEl) {
-      smoothTextUpdate(myAircraftEl, acftShort);      // Update aircraft
-      smoothTextUpdate(myDepEl, dep);            // Update departure
-      smoothTextUpdate(myDestEl, arr);           // Update
-    } else {
-      console.warn("Aircraft or Route element(s) missing from the DOM.");
-    }
-
+    smoothTextUpdate(document.getElementById('my-aircraft'), acftShort);
+    smoothTextUpdate(document.getElementById('my-dep'), dep);
+    smoothTextUpdate(document.getElementById('my-dest'), arr);
     smoothTextUpdate(myAltEl, alt.toString());
 
-    // Extract aircraft registration from flight plan remarks
+    // Extract & Fetch Aircraft Registration
     const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
     if (regMatch) {
       const foundReg = regMatch[1].toUpperCase();
-      console.log("Detected registration in remarks:", foundReg);
-
-      // Fetch aircraft details from your aircraft API
       fetch(`/api/aircraft/${foundReg}`)
-          .then(r => {
-            if (!r.ok) {
-              throw new Error(`Aircraft not found or error: ${r.status}`);
-            }
-            return r.json();
-          })
-          .then(acData => {
-            console.log("Fetched aircraft data:", acData);
-            showMyAircraftRegBox(acData);
-          })
-          .catch(err => {
-            console.warn("No aircraft details for", foundReg, err);
-            document.getElementById('my-aircraft-reg-card').style.display = 'none';
-          });
+        .then(r => r.json())
+        .then(acData => showMyAircraftRegBox(acData))
+        .catch(() => document.getElementById('my-aircraft-reg-card').style.display = 'none');
     } else {
       document.getElementById('my-aircraft-reg-card').style.display = 'none';
     }
 
-    // Distance and ETE calculations and progress bar update:
-    let distRemaining = '--';
-    let eteString = '--';
-
+    // Distance, ETE & Progress Bar Calculations
     if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
-      const depKey = dep.trim().toUpperCase();
-      const arrKey = arr.trim().toUpperCase();
+      const depKey = dep.toUpperCase();
+      const arrKey = arr.toUpperCase();
       const pilotLat = myPilot.latitude;
       const pilotLon = myPilot.longitude;
 
-      // Fetch distance to destination
-      const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
-          .then(r => r.json());
+      const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`).then(r => r.json());
+      const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`).then(r => r.json());
 
-      // Fetch distance from departure
-      const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`)
-          .then(r => r.json());
-
-      // Wait for both distance fetches
       Promise.all([arrDistancePromise, depDistancePromise])
-          .then(([arrDistData, depDistData]) => {
-            if (arrDistData.error || depDistData.error) {
-              console.warn('Distance error:', arrDistData.error || depDistData.error);
-              return;
-            }
+        .then(([arrDistData, depDistData]) => {
+          if (arrDistData.error || depDistData.error) {
+            console.warn('Distance error:', arrDistData.error || depDistData.error);
+            return;
+          }
 
-            // Assign computed distances
-            myPilot.distance_from_dep = depDistData.distanceNm;
-            myPilot.distance_remaining = arrDistData.distanceNm;
-            myPilot.total_distance = myPilot.distance_from_dep + myPilot.distance_remaining;
+          myPilot.distance_from_dep = depDistData.distanceNm;
+          myPilot.distance_remaining = arrDistData.distanceNm;
+          myPilot.total_distance = myPilot.distance_from_dep + myPilot.distance_remaining;
 
-            // Calculate ETE if groundspeed > 0
-            if (myPilot.groundspeed > 0 && myPilot.distance_remaining > 1) {
-              const hours = myPilot.distance_remaining / myPilot.groundspeed;
-              const hh = Math.floor(hours);
-              const mm = Math.floor((hours - hh) * 60);
-              myPilot.ete = `${hh}h ${mm}m`;
-            } else {
-              myPilot.ete = "--";
-            }
+          if (myPilot.groundspeed > 0 && myPilot.distance_remaining > 1) {
+            const hours = myPilot.distance_remaining / myPilot.groundspeed;
+            myPilot.ete = `${Math.floor(hours)}h ${Math.floor((hours - Math.floor(hours)) * 60)}m`;
+          } else {
+            myPilot.ete = "--";
+          }
 
-            // Update progress bar
-            updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
-
-            // Ensure UI updates
-            updateVatsimTracker(myPilot);
-          })
-          .catch(err => {
-            console.error('Distance fetch failed', err);
-          });
+          updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
+          updateVatsimTracker(myPilot);
+        })
+        .catch(err => console.error('Distance fetch failed', err));
     } else {
-      // If no valid position or route, update UI with placeholders
       myPilot.distance_from_dep = "--";
       myPilot.distance_remaining = "--";
       myPilot.total_distance = "--";
       myPilot.ete = "--";
-
       updateVatsimTracker(myPilot);
     }
   } catch (err) {

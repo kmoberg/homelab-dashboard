@@ -224,59 +224,50 @@
 </div>
 </div>
 
-  <!-- VATSIM Stats Card -->
-  <div class="card" id="vatsim-card">
-    <div>
-      <h2><i class="bi bi-people-fill"></i> VATSIM Stats</h2>
-      <span id="vatsim-status" class="fade">Loading...</span>
-    </div>
-
-    <h3>VATSIM Summary</h3>
-    <table id="vatsim-summary-table" class="fade custom-table">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <h3>Most Popular Airports</h3>
-    <table id="vatsim-airports-table" class="fade custom-table">
-      <thead>
-        <tr>
-          <th>Airport</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <h3>Most Popular Aircraft Families</h3>
-    <table id="vatsim-aircraft-table" class="fade custom-table">
-      <thead>
-        <tr>
-          <th>Family</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <h3><i class="bi bi-star-fill"></i> Favorite Airports</h3>
-    <table id="vatsim-airport-table" class="fade custom-table">
-      <thead>
-        <tr>
-          <th>ICAO</th>
-          <th><i class="bi bi-airplane airplane-rotated"></i> Departures</th>
-          <th><i class="bi bi-airplane"></i> Arrivals</th>
-          <th><i class="bi bi-map-fill"></i> On Ground</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <!-- VATSIM Stats Card (Updated Design) -->
+<div class="card vatsim-stats-card" id="vatsim-card">
+  <div class="vatsim-stats-header">
+    <h2><i class="bi bi-people-fill"></i> VATSIM Stats</h2>
+    <span id="vatsim-status" class="fade">Loading...</span>
   </div>
+
+  <!-- VATSIM Summary Section -->
+  <div class="vatsim-summary">
+    <div class="stat-box">
+      <i class="bi bi-person-fill"></i>
+      <p>Total Clients</p>
+      <span id="vatsim-total-clients">--</span>
+    </div>
+    <div class="stat-box">
+      <i class="bi bi-airplane"></i>
+      <p>Pilots</p>
+      <span id="vatsim-total-pilots">--</span>
+    </div>
+    <div class="stat-box">
+      <i class="bi bi-headset"></i>
+      <p>Controllers</p>
+      <span id="vatsim-total-atc">--</span>
+    </div>
+  </div>
+
+  <!-- Most Popular Airports -->
+  <h3><i class="bi bi-map"></i> Most Popular Airports</h3>
+  <ul class="vatsim-list" id="vatsim-airports-list">
+    <li>Loading...</li>
+  </ul>
+
+  <!-- Most Popular Aircraft Families -->
+  <h3><i class="bi bi-airplane-engines"></i> Popular Aircraft</h3>
+  <ul class="vatsim-list" id="vatsim-aircraft-list">
+    <li>Loading...</li>
+  </ul>
+
+  <!-- Favorite Airports -->
+  <h3><i class="bi bi-star-fill"></i> Favorite Airports</h3>
+  <ul class="vatsim-list" id="vatsim-favorite-airports">
+    <li>Loading...</li>
+  </ul>
+</div>
 
 
 </div>
