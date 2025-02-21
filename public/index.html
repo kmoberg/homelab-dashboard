@@ -114,37 +114,42 @@
   <h2><i class="bi bi-airplane"></i> Airport (ENZV)</h2>
 
   <!-- A table to style the airport stats -->
-  <table id="enzv-stats-table" class="fade custom-table">
-    <thead>
-      <tr>
-        <th>Pressure</th>
-        <th>Temperature</th>
-        <th>Dew Pt</th>
-        <th>Visibility</th>
-        <th>Wind</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <span id="enzv-pressure" class="fade">--</span>
-          <i class="bi" id="enzv-trend-arrow"></i>
-        </td>
-        <td>
-          <span id="enzv-temp" class="fade">--</span> °C
-        </td>
-        <td>
-          <span id="enzv-dew" class="fade">--</span> °C
-        </td>
-        <td>
-          <span id="enzv-vis" class="fade">--</span> mi
-        </td>
-        <td>
-          <span id="enzv-wind" class="fade">--</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="enzv-stats">
+  <div class="enzv-pill">
+    <i class="bi bi-speedometer2"></i>
+    <p>Pressure</p>
+    <span id="enzv-pressure" class="fade">--</span>
+    <!-- The up/down/dash arrow can go here, same ID as before: -->
+    <i class="bi" id="enzv-trend-arrow"></i>
+  </div>
+
+  <div class="enzv-pill">
+    <i class="bi bi-thermometer-half"></i>
+    <p>Temperature</p>
+    <span id="enzv-temp" class="fade">--</span>
+    <small>°C</small>
+  </div>
+
+  <div class="enzv-pill">
+    <i class="bi bi-droplet-half"></i>
+    <p>Dew Pt</p>
+    <span id="enzv-dew" class="fade">--</span>
+    <small>°C</small>
+  </div>
+
+  <div class="enzv-pill">
+    <i class="bi bi-eye"></i>
+    <p>Visibility</p>
+    <span id="enzv-vis" class="fade">--</span>
+    <small>mi</small>
+  </div>
+
+  <div class="enzv-pill">
+    <i class="bi bi-wind"></i>
+    <p>Wind</p>
+    <span id="enzv-wind" class="fade">--</span>
+  </div>
+</div>
 
   <!-- Then your pressure chart below -->
   <div style="width: 90%; max-width: 600px; margin-top: 1em;">

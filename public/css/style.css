@@ -673,3 +673,49 @@ hr {
   display: block;
   margin-top: 1px;
 }
+
+/* Pill-based layout for ENZV stats */
+.enzv-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-around;
+  margin-bottom: 1em; /* spacing before the pressure chart, etc. */
+}
+
+.enzv-pill {
+  background: #333;
+  padding: 10px 15px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 80px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  position: relative; /* so your arrow can sit next to the pressure if you like */
+}
+
+.enzv-pill i {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  display: block; /* icon on its own line */
+}
+
+.enzv-pill p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.enzv-pill span {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffcc00;
+  display: block;
+  margin-top: 2px;
+}
+
+.enzv-pill small {
+  font-size: 0.8rem;
+  color: #aaa;
+  display: block;
+  margin-top: 1px;
+}
