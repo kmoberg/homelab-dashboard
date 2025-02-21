@@ -345,7 +345,7 @@ hr {
 /* Ensure all cards inside VATSIM column fill width */
 #vatsim-column .card {
   width: 100%;
-  max-width: 500px;
+  max-width: 450px;
 }
 
 /* Responsive Layout: Adjust for smaller screens */
