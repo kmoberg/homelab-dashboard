@@ -880,9 +880,10 @@ async function fetchVatsimStats() {
       }
     });
     // === Process Most Popular Airports (Departures, Arrivals, On-Ground) ===
+// === Process Most Popular Airports (Departures, Arrivals, On-Ground) ===
 const airportStats = {};
 
-// Collect departures, arrivals, and ground aircraft counts
+// Collect departures, arrivals, and on-ground aircraft counts
 data.pilots.forEach(pilot => {
   const dep = pilot.flight_plan?.departure?.toUpperCase().trim();
   const arr = pilot.flight_plan?.arrival?.toUpperCase().trim();
@@ -901,7 +902,7 @@ data.pilots.forEach(pilot => {
 
   // Check if the aircraft is on the ground at any of the tracked airports
   Object.keys(airportStats).forEach(icao => {
-    if (isOnGround(pilot, { icao, lat, lon })) {
+    if (isOnGround(pilot, { lat, lon })) {
       airportStats[icao].onGround++;
     }
   });
@@ -912,22 +913,14 @@ const sortedApts = Object.entries(airportStats)
   .sort((a, b) => b[1].departures - a[1].departures)
   .slice(0, 5);
 
-// Update UI with new data
+// Update UI with properly formatted data
 airportsListEl.innerHTML = sortedApts.length
   ? sortedApts.map(([icao, stats]) => `
       <div class="airport-bubble">
         <strong>${icao}</strong>
-        <span>${stats.departures} / ${stats.arrivals} (${stats.onGround})</span>
+        <span>${stats.departures || 0} / ${stats.arrivals || 0} (${stats.onGround || 0})</span>
       </div>`).join("")
   : `<div class="loading-text">No data available</div>`;
-
-    airportsListEl.innerHTML = sortedApts.length
-      ? sortedApts.map(([apt, count]) => `
-          <div class="airport-bubble">
-            <strong>${apt}</strong>
-            <span>${count} Departures</span>
-          </div>`).join("")
-      : `<div class="loading-text">No data available</div>`;
 
     // === Process Most Popular Aircraft ===
     const acftMap = {};
