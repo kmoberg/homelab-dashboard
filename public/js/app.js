@@ -910,14 +910,14 @@ async function fetchVatsimStats() {
     });
 
     // -------------------------------------------------
-    // 4) Determine the top-5 airports by departures
+    // 4) Determine the top-6 airports by departures
     // -------------------------------------------------
     const sortedApts = Object.entries(airportStats)
       .sort((a, b) => b[1].departures - a[1].departures)
-      .slice(0, 5);
+      .slice(0, 6);
 
     // -------------------------------------------------
-    // 5) Fetch coordinates for each top-5 airport (async)
+    // 5) Fetch coordinates for each top-6 airport (async)
     //    Using your /api/airport/<icao> endpoint.
     // -------------------------------------------------
     const airportCoords = {}; // Will map ICAO -> { lat, lon }
