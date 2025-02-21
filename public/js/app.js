@@ -688,24 +688,134 @@ function isOnGround(pilot, airport) {
 
 // 8B) Aircraft families
 const aircraftFamilyMap = {
-  A32: "Airbus A320",
-  A33: "Airbus A330",
-  A34: "Airbus A340",
-  A35: "Airbus A350",
-  A38: "Airbus A380",
-  B73: "Boeing 737",
-  B74: "Boeing 747",
-  B75: "Boeing 757",
-  B76: "Boeing 767",
-  B77: "Boeing 777",
-  B78: "Boeing 787",
-  CRJ: "Bombardier CRJ",
-  E17: "Embraer 170-175",
-  E19: "Embraer 190-195"
+  // ========== AIRBUS ==========
+  "A318": "Airbus A320",
+  "A319": "Airbus A320",
+  "A320": "Airbus A320",
+  "A321": "Airbus A320",
+  "A20N": "Airbus A320neo",
+  "A21N": "Airbus A320neo",
+
+  "A330": "Airbus A330",
+  "A332": "Airbus A330",
+  "A333": "Airbus A330",
+  "A338": "Airbus A330neo",
+  "A339": "Airbus A330neo",
+
+  "A340": "Airbus A340",
+  "A342": "Airbus A340",
+  "A343": "Airbus A340",
+  "A345": "Airbus A340",
+  "A346": "Airbus A340",
+
+  "A350": "Airbus A350",
+  "A359": "Airbus A350",
+  "A35K": "Airbus A350",
+
+  "A380": "Airbus A380",
+
+  // ========== BOEING ==========
+  "B707": "Boeing 707",
+  "B717": "Boeing 717",
+  "B727": "Boeing 727",
+
+  "B737": "Boeing 737",
+  "B731": "Boeing 737",
+  "B732": "Boeing 737",
+  "B733": "Boeing 737",
+  "B734": "Boeing 737",
+  "B735": "Boeing 737",
+  "B736": "Boeing 737",
+  "B737": "Boeing 737",
+  "B738": "Boeing 737",
+  "B739": "Boeing 737",
+  "B37M": "Boeing 737 MAX",
+  "B38M": "Boeing 737 MAX",
+  "B39M": "Boeing 737 MAX",
+
+  "B747": "Boeing 747",
+  "B741": "Boeing 747",
+  "B742": "Boeing 747",
+  "B743": "Boeing 747",
+  "B744": "Boeing 747",
+  "B748": "Boeing 747",
+
+  "B757": "Boeing 757",
+  "B752": "Boeing 757",
+  "B753": "Boeing 757",
+
+  "B767": "Boeing 767",
+  "B762": "Boeing 767",
+  "B763": "Boeing 767",
+  "B764": "Boeing 767",
+
+  "B777": "Boeing 777",
+  "B772": "Boeing 777",
+  "B773": "Boeing 777",
+  "B77L": "Boeing 777",
+  "B77W": "Boeing 777",
+
+  "B787": "Boeing 787",
+  "B788": "Boeing 787",
+  "B789": "Boeing 787",
+  "B78X": "Boeing 787",
+
+  // ========== EMBRAER ==========
+  "E170": "Embraer E-Jet",
+  "E175": "Embraer E-Jet",
+  "E190": "Embraer E-Jet",
+  "E195": "Embraer E-Jet",
+  "E290": "Embraer E2",
+  "E295": "Embraer E2",
+
+  // ========== BOMBARDIER ==========
+  "CRJ": "Bombardier CRJ",
+  "CRJ1": "Bombardier CRJ",
+  "CRJ2": "Bombardier CRJ",
+  "CRJ7": "Bombardier CRJ",
+  "CRJ9": "Bombardier CRJ",
+  "CRJX": "Bombardier CRJ",
+
+  "DH8A": "Bombardier Dash 8",
+  "DH8B": "Bombardier Dash 8",
+  "DH8C": "Bombardier Dash 8",
+  "DH8D": "Bombardier Dash 8",
+
+  // ========== ATR ==========
+  "AT42": "ATR 42",
+  "AT43": "ATR 42",
+  "AT45": "ATR 42",
+  "AT46": "ATR 42",
+  "AT72": "ATR 72",
+
+  // ========== MISC ==========
+  "CONC": "Concorde",
+  "C130": "Lockheed C-130",
+  "L101": "Lockheed L-1011 Tristar",
+  "MD11": "McDonnell Douglas MD-11",
+  "MD80": "McDonnell Douglas MD-80",
+  "MD81": "McDonnell Douglas MD-80",
+  "MD82": "McDonnell Douglas MD-80",
+  "MD83": "McDonnell Douglas MD-80",
+  "MD87": "McDonnell Douglas MD-80",
+  "MD88": "McDonnell Douglas MD-80",
+  "MD90": "McDonnell Douglas MD-80",
+
+  // ========== COMAC ==========
+  "C919": "COMAC C919",
+  "ARJ2": "COMAC ARJ21"
 };
+
 function getAircraftFamily(acftShort) {
   if (!acftShort || acftShort.length < 3) return acftShort || "Unknown";
-  const prefix = acftShort.substring(0,3).toUpperCase();
+
+  const code = acftShort.toUpperCase();
+
+  // First, check for an exact ICAO match
+  if (aircraftFamilyMap[code]) return aircraftFamilyMap[code];
+
+  // If not found, check based on the first 3 letters
+  const prefix = code.substring(0, 3);
   return aircraftFamilyMap[prefix] || prefix;
 }
 
