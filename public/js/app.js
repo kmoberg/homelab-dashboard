@@ -832,7 +832,7 @@ async function fetchVatsimStats() {
     }
     myCard.style.display = 'block';
 
-// Call function to update all tracker details
+  // Call function to update all tracker details
     updateVatsimTracker(myPilot);
 
     const plan = myPilot.flight_plan || {};
@@ -1010,31 +1010,38 @@ function getFlightPhase(altitude, vspeed) {
 
 function updateVatsimTracker(myPilot) {
   // Set callsign
-  smoothTextUpdate(document.getElementById("my-callsign"), myPilot.callsign);
+  smoothTextUpdate(document.getElementById("my-callsign"), myPilot.callsign || "--");
 
   // Update origin and destination
-  smoothTextUpdate(document.getElementById("my-dep"), myPilot.flight_plan.departure);
-  smoothTextUpdate(document.getElementById("my-dest"), myPilot.flight_plan.arrival);
+  smoothTextUpdate(document.getElementById("my-dep"), myPilot.flight_plan?.departure || "--");
+  smoothTextUpdate(document.getElementById("my-dest"), myPilot.flight_plan?.arrival || "--");
 
   // Update flight phase
-  const phase = getFlightPhase(myPilot.altitude, myPilot.vertical_speed);
+  const phase = getFlightPhase(myPilot.altitude || 0, myPilot.vertical_speed || 0);
   smoothTextUpdate(document.getElementById("my-phase"), phase);
 
-  // Update distance data
-  smoothTextUpdate(document.getElementById("my-dist-from-origin"), myPilot.distance_from_dep.toFixed(0));
-  smoothTextUpdate(document.getElementById("my-total-dist"), myPilot.total_distance.toFixed(0));
-  smoothTextUpdate(document.getElementById("my-dist-remaining"), myPilot.distance_remaining.toFixed(0));
-  smoothTextUpdate(document.getElementById("my-ete"), myPilot.ete);
+  // Ensure distance values exist before calling toFixed()
+  const distFromOrigin = myPilot.distance_from_dep !== undefined ? myPilot.distance_from_dep.toFixed(0) : "--";
+  const totalDist = myPilot.total_distance !== undefined ? myPilot.total_distance.toFixed(0) : "--";
+  const distRemaining = myPilot.distance_remaining !== undefined ? myPilot.distance_remaining.toFixed(0) : "--";
+  const ete = myPilot.ete || "--";
 
-  // Update flight details
-  smoothTextUpdate(document.getElementById("my-altitude"), myPilot.altitude);
-  smoothTextUpdate(document.getElementById("my-groundspeed"), myPilot.groundspeed);
-  smoothTextUpdate(document.getElementById("my-heading"), myPilot.heading);
-  smoothTextUpdate(document.getElementById("my-vs"), myPilot.vertical_speed);
-  smoothTextUpdate(document.getElementById("my-aircraft"), myPilot.flight_plan.aircraft_short);
+  smoothTextUpdate(document.getElementById("my-dist-from-origin"), distFromOrigin);
+  smoothTextUpdate(document.getElementById("my-total-dist"), totalDist);
+  smoothTextUpdate(document.getElementById("my-dist-remaining"), distRemaining);
+  smoothTextUpdate(document.getElementById("my-ete"), ete);
 
-  // Update progress bar
-  updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
+  // Update flight details safely
+  smoothTextUpdate(document.getElementById("my-altitude"), myPilot.altitude !== undefined ? myPilot.altitude : "--");
+  smoothTextUpdate(document.getElementById("my-groundspeed"), myPilot.groundspeed !== undefined ? myPilot.groundspeed : "--");
+  smoothTextUpdate(document.getElementById("my-heading"), myPilot.heading !== undefined ? myPilot.heading : "--");
+  smoothTextUpdate(document.getElementById("my-vs"), myPilot.vertical_speed !== undefined ? myPilot.vertical_speed : "--");
+  smoothTextUpdate(document.getElementById("my-aircraft"), myPilot.flight_plan?.aircraft_short || "--");
+
+  // Update progress bar only if distance values exist
+  if (myPilot.distance_from_dep !== undefined && myPilot.total_distance !== undefined) {
+    updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
+  }
 }
 
 // ==========================
