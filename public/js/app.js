@@ -900,10 +900,21 @@ data.pilots.forEach(pilot => {
     airportStats[arr].arrivals++;
   }
 
-  // Check if the aircraft is on the ground at any of the tracked airports
-  Object.keys(airportStats).forEach(icao => {
-    if (isOnGround(pilot, { lat, lon })) {
-      airportStats[icao].onGround++;
+    // Initialize onGround counter for each airport
+  if (dep && !airportStats[dep]) airportStats[dep] = { departures: 0, arrivals: 0, onGround: 0 };
+  if (arr && !airportStats[arr]) airportStats[arr] = { departures: 0, arrivals: 0, onGround: 0 };
+
+  // Increase departure and arrival counts
+  if (dep) airportStats[dep].departures++;
+  if (arr) airportStats[arr].arrivals++;
+
+  // Track on-ground aircraft for each airport separately
+  trackedAirports.forEach(airport => {
+    if (isOnGround(pilot, airport)) {
+      if (!airportStats[airport.icao]) {
+        airportStats[airport.icao] = { departures: 0, arrivals: 0, onGround: 0 };
+      }
+      airportStats[airport.icao].onGround++;
     }
   });
 });
@@ -918,7 +929,9 @@ airportsListEl.innerHTML = sortedApts.length
   ? sortedApts.map(([icao, stats]) => `
       <div class="airport-bubble">
         <strong>${icao}</strong>
-        <span>${stats.departures || 0} / ${stats.arrivals || 0} (${stats.onGround || 0})</span>
+        <span>D: ${stats.departures || 0}</span>
+        <span>A: ${stats.arrivals || 0}</span>
+        <span>On Ground: ${stats.onGround || 0}</span>
       </div>`).join("")
   : `<div class="loading-text">No data available</div>`;
 
