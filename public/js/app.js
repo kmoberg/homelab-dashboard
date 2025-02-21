@@ -884,47 +884,59 @@ smoothTextUpdate(myAltEl, alt.toString());
     }
 
     // Distance and ETE calculations and progress bar update:
-    let distRemaining = '--';
-    let eteString = '--';
-    if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
-      const arrKey = arr.trim().toUpperCase();
-      const pilotLat = myPilot.latitude;
-      const pilotLon = myPilot.longitude;
-      fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
-        .then(r => r.json())
-        .then(distData => {
-          if (distData.error) {
-            console.warn('Distance error:', distData.error);
-            return;
-          }
-          const d = distData.distanceNm;
-          distRemaining = d.toFixed(0);
-          smoothTextUpdate(myDistEl, distRemaining);
+let distRemaining = '--';
+let eteString = '--';
 
-          // Calculate ETE if groundspeed > 0
-          const gs = myPilot.groundspeed || 0;
-          if (gs > 0 && d > 1) {
-            const hours = d / gs;
-            const hh = Math.floor(hours);
-            const mm = Math.floor((hours - hh) * 60);
-            eteString = `${hh}h ${mm}m`;
-            smoothTextUpdate(myETEEl, eteString);
-          } else {
-            smoothTextUpdate(myETEEl, '--');
-          }
+if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
+  const depKey = dep.trim().toUpperCase();
+  const arrKey = arr.trim().toUpperCase();
+  const pilotLat = myPilot.latitude;
+  const pilotLon = myPilot.longitude;
 
-          // Update the progress bar.
-          // Assume the flight plan contains a total_distance field (in nm).
-          const totalDistance = plan.total_distance || 300; // default to 300 nm if not provided
-          updateDistanceProgress(d, totalDistance);
-        })
-        .catch(err => {
-          console.error('Distance fetch failed', err);
-        });
-    } else {
-      smoothTextUpdate(myDistEl, '--');
-      smoothTextUpdate(myETEEl, '--');
-    }
+  // Fetch distance to destination
+  const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
+    .then(r => r.json());
+
+  // Fetch distance from departure
+  const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`)
+    .then(r => r.json());
+
+  // Process both distances
+  Promise.all([arrDistancePromise, depDistancePromise])
+    .then(([arrDistData, depDistData]) => {
+      if (arrDistData.error || depDistData.error) {
+        console.warn('Distance error:', arrDistData.error || depDistData.error);
+        return;
+      }
+
+      const distanceFromDep = depDistData.distanceNm;
+      const distanceRemaining = arrDistData.distanceNm;
+      const totalDistance = distanceFromDep + distanceRemaining;
+
+      smoothTextUpdate(myDistEl, distanceRemaining.toFixed(0));
+
+      // Calculate ETE if groundspeed > 0
+      const gs = myPilot.groundspeed || 0;
+      if (gs > 0 && distanceRemaining > 1) {
+        const hours = distanceRemaining / gs;
+        const hh = Math.floor(hours);
+        const mm = Math.floor((hours - hh) * 60);
+        eteString = `${hh}h ${mm}m`;
+        smoothTextUpdate(myETEEl, eteString);
+      } else {
+        smoothTextUpdate(myETEEl, '--');
+      }
+
+      // Update the progress bar with actual total distance
+      updateDistanceProgress(distanceFromDep, totalDistance);
+    })
+    .catch(err => {
+      console.error('Distance fetch failed', err);
+    });
+} else {
+  smoothTextUpdate(myDistEl, '--');
+  smoothTextUpdate(myETEEl, '--');
+}
   } catch (err) {
     console.error('Error fetching VATSIM stats:', err);
     myCard.style.display = 'none';
