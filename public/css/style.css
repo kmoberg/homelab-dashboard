@@ -329,3 +329,24 @@ hr {
     border-right: 1px solid #444444;
     padding: 5px;
 }
+
+/* VATSIM Stats + Tracker in One Column */
+#vatsim-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px; /* Ensures both cards fit well */
+}
+
+/* Responsive: Adjust layout for smaller screens */
+@media (max-width: 768px) {
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #vatsim-column {
+    width: 90%;
+  }
+}

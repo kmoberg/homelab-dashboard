@@ -157,109 +157,87 @@
     <!-- We'll fill this container via JS -->
   </div>
 </div>
+<!-- VATSIM Column (Stats + Tracker) -->
+<div class="card-column" id="vatsim-column">
 
-<!-- My personal VATSIM status box -->
-<div class="card" id="my-vatsim-card" style="display:none;">
-  <div class="vatsim-status-header">
-    <h2 id="my-callsign" class="highlighted-callsign">
-      <i class="bi bi-airplane"></i> <!-- Airplane icon inside the callsign -->
-      <span>--</span>
-    </h2>
-    <div class="route">
-      <span id="my-dep">--</span> → <span id="my-dest">--</span>
+  <!-- My personal VATSIM Tracker (Moved inside same column) -->
+  <div class="card" id="my-vatsim-card" style="display:none;">
+    <div class="vatsim-status-header">
+      <h2 id="my-callsign" class="highlighted-callsign">
+        <i class="bi bi-airplane"></i> <span>--</span>
+      </h2>
+      <div class="route">
+        <span id="my-dep">--</span> → <span id="my-dest">--</span>
+      </div>
+    </div>
+    <div class="vatsim-route-summary">
+      <p><strong>Aircraft:</strong> <span id="my-aircraft">--</span></p>
+    </div>
+    <div class="vatsim-status-body">
+      <p><strong>Altitude:</strong> <span id="my-altitude">--</span></p>
+      <p><strong>Distance Remaining:</strong> <span id="my-dist-remaining">--</span> nm</p>
+      <p><strong>ETE:</strong> <span id="my-ete">--</span></p>
+    </div>
+    <div class="progress-bar-container">
+      <div id="distance-progress-bar" class="progress-bar-fill"></div>
     </div>
   </div>
-  <div class="vatsim-route-summary">
-    <p><strong>Aircraft:</strong> <span id="my-aircraft">--</span></p>
-  </div>
-  <div class="vatsim-status-body">
-    <p><strong>Altitude:</strong> <span id="my-altitude">--</span></p>
-    <p><strong>Distance Remaining:</strong> <span id="my-dist-remaining">--</span> nm</p>
-    <p><strong>ETE:</strong> <span id="my-ete">--</span></p>
-  </div>
-  <!-- Progress Bar: a container and a filling div -->
-  <div class="progress-bar-container">
-    <div id="distance-progress-bar" class="progress-bar-fill"></div>
-  </div>
-<div id="my-aircraft-reg-card" style="display:none;">
-  <h2>My Aircraft Details</h2>
-  <table class="custom-table">
-    <tbody>
-      <!-- We only display rows for fields that are non-empty -->
-      <tr id="row-reg-registration"><td><strong>Registration:</strong></td><td id="reg-registration">--</td></tr>
-      <tr id="row-reg-icao24"><td><strong>ICAO24:</strong></td><td id="reg-icao24">--</td></tr>
-      <tr id="row-reg-selcal"><td><strong>SELCAL:</strong></td><td id="reg-selcal">--</td></tr>
-      <tr id="row-reg-type"><td><strong>Type:</strong></td><td id="reg-type">--</td></tr>
-      <tr id="row-reg-operator"><td><strong>Operator:</strong></td><td id="reg-operator">--</td></tr>
-      <tr id="row-reg-model"><td><strong>Model:</strong></td><td id="reg-model">--</td></tr>
-      <tr id="row-reg-name"><td><strong>Name:</strong></td><td id="reg-name">--</td></tr>
-      <tr id="row-reg-engines"><td><strong>Engines:</strong></td><td id="reg-engines">--</td></tr>
-      <tr id="row-reg-status"><td><strong>Status:</strong></td><td id="reg-status">--</td></tr>
-      <tr id="row-reg-remarks"><td><strong>Remarks:</strong></td><td><pre id="reg-remarks" style="white-space: pre-wrap; margin:0;">--</pre></td></tr>
-    </tbody>
-  </table>
-</div>
-</div>
 
   <!-- VATSIM Stats Card -->
-<div class="card" id="vatsim-card">
-  <div><h2><i class="bi bi-people-fill"></i> VATSIM Stats</h2> <span id="vatsim-status" class="fade">Loading..
-  .</span></div>
+  <div class="card" id="vatsim-card">
+    <div>
+      <h2><i class="bi bi-people-fill"></i> VATSIM Stats</h2>
+      <span id="vatsim-status" class="fade">Loading...</span>
+    </div>
 
-  <h3>VATSIM Summary</h3>
-  <table id="vatsim-summary-table" class="fade custom-table">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Count</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h3>VATSIM Summary</h3>
+    <table id="vatsim-summary-table" class="fade custom-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-  <h3>Most Popular Airports</h3>
-  <table id="vatsim-airports-table" class="fade custom-table">
-    <thead>
-      <tr>
-        <th>Airport</th>
-        <th>Count</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h3>Most Popular Airports</h3>
+    <table id="vatsim-airports-table" class="fade custom-table">
+      <thead>
+        <tr>
+          <th>Airport</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-  <h3>Most Popular Aircraft Families</h3>
-  <table id="vatsim-aircraft-table" class="fade custom-table">
-    <thead>
-      <tr>
-        <th>Family</th>
-        <th>Count</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h3>Most Popular Aircraft Families</h3>
+    <table id="vatsim-aircraft-table" class="fade custom-table">
+      <thead>
+        <tr>
+          <th>Family</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-  <h3><i class="bi bi-star-fill"></i> Favorite Airports</h3>
-  <table id="vatsim-airport-table" class="fade custom-table">
-    <thead>
-      <tr>
-        <th>ICAO</th>
-        <th>
-          <i class="bi bi-airplane airplane-rotated"></i>
-          Departures
-        </th>
-        <th>
-          <i class="bi bi-airplane"></i>
-          Arrivals
-        </th>
-        <th>
-          <i class="bi bi-map-fill"></i>
-          On Ground
-        </th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <h3><i class="bi bi-star-fill"></i> Favorite Airports</h3>
+    <table id="vatsim-airport-table" class="fade custom-table">
+      <thead>
+        <tr>
+          <th>ICAO</th>
+          <th><i class="bi bi-airplane airplane-rotated"></i> Departures</th>
+          <th><i class="bi bi-airplane"></i> Arrivals</th>
+          <th><i class="bi bi-map-fill"></i> On Ground</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+
 </div>
 
 <!-- SECOND ROW for Electricity Card (fills width) -->
