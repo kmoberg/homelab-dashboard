@@ -884,9 +884,35 @@ async function fetchVatsimStats() {
     });
     const sortedApts = Object.entries(depMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    airportsListEl.innerHTML = sortedApts.length
-      ? sortedApts.map(([apt, count]) => `<li><strong>${apt}</strong> - ${count} departures</li>`).join("")
-      : "<li>No data available</li>";
+    // Process Most Popular Airports
+airportsListEl.innerHTML = sortedApts.length
+  ? sortedApts.map(([apt, count]) => `
+      <div class="airport-bubble">
+        <strong>${apt}</strong>
+        <span>${count} Departures</span>
+      </div>`).join("")
+  : `<div class="loading-text">No data available</div>`;
+
+// Process Most Popular Aircraft
+aircraftListEl.innerHTML = sortedAcft.length
+  ? sortedAcft.map(([fam, count]) => `
+      <div class="aircraft-bubble">
+        <strong>${fam}</strong>
+        <span>${count} Flights</span>
+      </div>`).join("")
+  : `<div class="loading-text">No data available</div>`;
+
+// Process Favorite Airports
+favoriteAirportsEl.innerHTML = trackedAirports.length
+  ? trackedAirports.map(a => {
+      const s = stats[a.icao];
+      return `
+        <div class="airport-bubble">
+          <strong>${s.icao}</strong>
+          <span>${s.departures} / ${s.arrivals} (${s.onGround})</span>
+        </div>`;
+    }).join("")
+  : `<div class="loading-text">No data available</div>`;
 
     // Process Most Popular Aircraft
     const acftMap = {};
