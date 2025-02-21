@@ -437,3 +437,28 @@ hr {
 .custom-table td {
   padding: 5px;
 }
+
+/* Aircraft Details Grid */
+.aircraft-details-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.aircraft-details-grid .detail-box {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+  padding: 5px;
+  background-color: #333;
+  border-radius: 5px;
+  display: none; /* Hide by default until populated */
+}
+
+.aircraft-details-grid .full-width {
+  flex: 100%;
+  text-align: left;
+  padding: 8px;
+}

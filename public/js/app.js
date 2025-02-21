@@ -66,13 +66,13 @@ async function fetchCurrentWeather() {
     smoothTextUpdate(document.getElementById('temperature'), `${tempC} °C`);
 
     smoothTextUpdate(
-      document.getElementById('wind-speed'),
-      `${currentDetails.wind_speed.toFixed(1)} m/s`
+        document.getElementById('wind-speed'),
+        `${currentDetails.wind_speed.toFixed(1)} m/s`
     );
 
     smoothTextUpdate(
-      document.getElementById('wind-speed-value'),
-      `${currentDetails.wind_speed.toFixed(1)} m/s`
+        document.getElementById('wind-speed-value'),
+        `${currentDetails.wind_speed.toFixed(1)} m/s`
     );
 
     const windDir = currentDetails.wind_from_direction;
@@ -103,9 +103,9 @@ async function setSymbolImage(imgId, symbolCode, dateStr) {
 
   // Normalize the "base" symbol by removing day/night/polartwilight
   const base = symbolCode
-    .replace('_day', '')
-    .replace('_night', '')
-    .replace('_polartwilight', '');
+      .replace('_day', '')
+      .replace('_night', '')
+      .replace('_polartwilight', '');
 
   // 1) Fetch sunrise/sunset data
   //    (If dateStr is missing, you might default to today's date.)
@@ -156,8 +156,8 @@ async function setSymbolImage(imgId, symbolCode, dateStr) {
 
   // 6) Pick final path based on existence
   const finalIconPath = iconExists
-    ? candidateIcon
-    : `images/weathericons/svg/${base}.svg`;
+      ? candidateIcon
+      : `images/weathericons/svg/${base}.svg`;
 
   // 7) Set <img> src
   imgElem.src = finalIconPath;
@@ -229,8 +229,8 @@ async function fetchSunTimes() {
 
     todayDaylightMinutes = getDaylightDurationMinutes(srISO, ssISO);
     smoothTextUpdate(
-      document.getElementById('today-length'),
-      formatHoursMinutes(todayDaylightMinutes)
+        document.getElementById('today-length'),
+        formatHoursMinutes(todayDaylightMinutes)
     );
   } catch (err) {
     console.error('Error fetching sunrise:', err);
@@ -282,16 +282,16 @@ async function compareSunTimes() {
   const diffDec21 = dec21Mins - todayDaylightMinutes;
 
   smoothTextUpdate(
-    document.getElementById('week-compare'),
-    `${formatHoursMinutes(weekAgoMins)} ${formatDiff(diffWeekAgo)}`
+      document.getElementById('week-compare'),
+      `${formatHoursMinutes(weekAgoMins)} ${formatDiff(diffWeekAgo)}`
   );
   smoothTextUpdate(
-    document.getElementById('inweek-compare'),
-    `${formatHoursMinutes(inOneWeekMins)} ${formatDiff(diffInWeek)}`
+      document.getElementById('inweek-compare'),
+      `${formatHoursMinutes(inOneWeekMins)} ${formatDiff(diffInWeek)}`
   );
   smoothTextUpdate(
-    document.getElementById('shortest-compare'),
-    `${formatHoursMinutes(dec21Mins)} ${formatDiff(diffDec21)}`
+      document.getElementById('shortest-compare'),
+      `${formatHoursMinutes(dec21Mins)} ${formatDiff(diffDec21)}`
   );
 }
 
@@ -329,8 +329,8 @@ async function fetchPrices() {
     if (data.today && data.today.prices) {
       const todayAvg = data.today.average;
       smoothTextUpdate(
-        document.getElementById('avg-price-today'),
-        todayAvg != null && !isNaN(todayAvg) ? todayAvg.toFixed(1) : '--'
+          document.getElementById('avg-price-today'),
+          todayAvg != null && !isNaN(todayAvg) ? todayAvg.toFixed(1) : '--'
       );
 
       const todayLabels = [];
@@ -352,8 +352,8 @@ async function fetchPrices() {
 
       if (currentPriceValue !== null && !isNaN(currentPriceValue)) {
         smoothTextUpdate(
-          document.getElementById('current-price'),
-          currentPriceValue.toFixed(0)
+            document.getElementById('current-price'),
+            currentPriceValue.toFixed(0)
         );
       } else {
         smoothTextUpdate(document.getElementById('current-price'), '--');
@@ -366,8 +366,8 @@ async function fetchPrices() {
       document.getElementById('tomorrowAverageRow').style.display = 'block';
       const tomAvg = data.tomorrow.average;
       smoothTextUpdate(
-        document.getElementById('avg-price-tomorrow'),
-        tomAvg != null && !isNaN(tomAvg) ? tomAvg.toFixed(1) : '--'
+          document.getElementById('avg-price-tomorrow'),
+          tomAvg != null && !isNaN(tomAvg) ? tomAvg.toFixed(1) : '--'
       );
 
       const tomorrowChartDiv = document.getElementById('tomorrowChartContainer');
@@ -458,18 +458,18 @@ async function fetchEnzvData() {
     smoothTextUpdate(document.getElementById('enzv-pressure'), pressureStr);
 
     smoothTextUpdate(
-      document.getElementById('enzv-temp'),
-      current.temp_c != null ? current.temp_c.toFixed(1) : '--'
+        document.getElementById('enzv-temp'),
+        current.temp_c != null ? current.temp_c.toFixed(1) : '--'
     );
     smoothTextUpdate(
-      document.getElementById('enzv-dew'),
-      current.dewpoint_c != null ? current.dewpoint_c.toFixed(1) : '--'
+        document.getElementById('enzv-dew'),
+        current.dewpoint_c != null ? current.dewpoint_c.toFixed(1) : '--'
     );
     smoothTextUpdate(
-      document.getElementById('enzv-vis'),
-      current.visibility_statute_mi != null
-        ? current.visibility_statute_mi.toFixed(1)
-        : '--'
+        document.getElementById('enzv-vis'),
+        current.visibility_statute_mi != null
+            ? current.visibility_statute_mi.toFixed(1)
+            : '--'
     );
 
     let windStr = '--';
@@ -671,8 +671,8 @@ function distanceNm(lat1, lon1, lat2, lon2) {
   const dLat = (lat2 - lat1) * toRad;
   const dLon = (lon2 - lon1) * toRad;
   const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1*toRad)*Math.cos(lat2*toRad)*
-            Math.sin(dLon/2)**2;
+      Math.cos(lat1*toRad)*Math.cos(lat2*toRad)*
+      Math.sin(dLon/2)**2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   const distKm = R * c;
   return distKm / 1.852; // nm
@@ -772,10 +772,10 @@ async function fetchVatsimStats() {
       }
     });
     const sortedApts = Object.entries(depMap)
-      .sort((a,b) => b[1] - a[1])
-      .slice(0,5);
+        .sort((a,b) => b[1] - a[1])
+        .slice(0,5);
     const airportRows = sortedApts.map(([apt, count]) =>
-      `<tr><td>${apt}</td><td>${count}</td></tr>`
+        `<tr><td>${apt}</td><td>${count}</td></tr>`
     );
     smoothTableUpdate(airportsTbody, airportRows);
 
@@ -788,10 +788,10 @@ async function fetchVatsimStats() {
       acftMap[fam] = (acftMap[fam] || 0) + 1;
     });
     const sortedAcft = Object.entries(acftMap)
-      .sort((a,b) => b[1] - a[1])
-      .slice(0,5);
+        .sort((a,b) => b[1] - a[1])
+        .slice(0,5);
     const aircraftRows = sortedAcft.map(([fam, c]) =>
-      `<tr><td>${fam}</td><td>${c}</td></tr>`
+        `<tr><td>${fam}</td><td>${c}</td></tr>`
     );
     smoothTableUpdate(aircraftTbody, aircraftRows);
 
@@ -831,6 +831,10 @@ async function fetchVatsimStats() {
       return;
     }
     myCard.style.display = 'block';
+
+// Call function to update all tracker details
+    updateVatsimTracker(myPilot);
+
     const plan = myPilot.flight_plan || {};
     const cSign = myPilot.callsign || '??';
     const acft = plan.aircraft || '--';
@@ -847,15 +851,15 @@ async function fetchVatsimStats() {
     const myDestEl = document.getElementById('my-dest');         // Destination element
     const myDepEl = document.getElementById('my-dep');           // Departure element
     // Check that the elements exist before updating
-if (myAircraftEl && myDestEl && myDepEl) {
-  smoothTextUpdate(myAircraftEl, acftShort);      // Update aircraft
-    smoothTextUpdate(myDepEl, dep);            // Update departure
-    smoothTextUpdate(myDestEl, arr);           // Update
-} else {
-  console.warn("Aircraft or Route element(s) missing from the DOM.");
-}
+    if (myAircraftEl && myDestEl && myDepEl) {
+      smoothTextUpdate(myAircraftEl, acftShort);      // Update aircraft
+      smoothTextUpdate(myDepEl, dep);            // Update departure
+      smoothTextUpdate(myDestEl, arr);           // Update
+    } else {
+      console.warn("Aircraft or Route element(s) missing from the DOM.");
+    }
 
-smoothTextUpdate(myAltEl, alt.toString());
+    smoothTextUpdate(myAltEl, alt.toString());
 
     // Extract aircraft registration from flight plan remarks
     const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
@@ -865,81 +869,81 @@ smoothTextUpdate(myAltEl, alt.toString());
 
       // Fetch aircraft details from your aircraft API
       fetch(`/api/aircraft/${foundReg}`)
-        .then(r => {
-          if (!r.ok) {
-            throw new Error(`Aircraft not found or error: ${r.status}`);
-          }
-          return r.json();
-        })
-        .then(acData => {
-          console.log("Fetched aircraft data:", acData);
-          showMyAircraftRegBox(acData);
-        })
-        .catch(err => {
-          console.warn("No aircraft details for", foundReg, err);
-          document.getElementById('my-aircraft-reg-card').style.display = 'none';
-        });
+          .then(r => {
+            if (!r.ok) {
+              throw new Error(`Aircraft not found or error: ${r.status}`);
+            }
+            return r.json();
+          })
+          .then(acData => {
+            console.log("Fetched aircraft data:", acData);
+            showMyAircraftRegBox(acData);
+          })
+          .catch(err => {
+            console.warn("No aircraft details for", foundReg, err);
+            document.getElementById('my-aircraft-reg-card').style.display = 'none';
+          });
     } else {
       document.getElementById('my-aircraft-reg-card').style.display = 'none';
     }
 
     // Distance and ETE calculations and progress bar update:
-let distRemaining = '--';
-let eteString = '--';
+    let distRemaining = '--';
+    let eteString = '--';
 
-if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
-  const depKey = dep.trim().toUpperCase();
-  const arrKey = arr.trim().toUpperCase();
-  const pilotLat = myPilot.latitude;
-  const pilotLon = myPilot.longitude;
+    if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
+      const depKey = dep.trim().toUpperCase();
+      const arrKey = arr.trim().toUpperCase();
+      const pilotLat = myPilot.latitude;
+      const pilotLon = myPilot.longitude;
 
-  // Fetch distance to destination
-  const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
-    .then(r => r.json());
+      // Fetch distance to destination
+      const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
+          .then(r => r.json());
 
-  // Fetch distance from departure
-  const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`)
-    .then(r => r.json());
+      // Fetch distance from departure
+      const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`)
+          .then(r => r.json());
 
-  // Process both distances
-  Promise.all([arrDistancePromise, depDistancePromise])
-    .then(([arrDistData, depDistData]) => {
-      if (arrDistData.error || depDistData.error) {
-        console.warn('Distance error:', arrDistData.error || depDistData.error);
-        return;
-      }
+      // Process both distances
+      Promise.all([arrDistancePromise, depDistancePromise])
+          .then(([arrDistData, depDistData]) => {
+            if (arrDistData.error || depDistData.error) {
+              console.warn('Distance error:', arrDistData.error || depDistData.error);
+              return;
+            }
 
-      const distanceFromDep = depDistData.distanceNm;
-      const distanceRemaining = arrDistData.distanceNm;
-      const totalDistance = distanceFromDep + distanceRemaining;
+            const distanceFromDep = depDistData.distanceNm;
+            const distanceRemaining = arrDistData.distanceNm;
+            const totalDistance = distanceFromDep + distanceRemaining;
 
-      smoothTextUpdate(myDistEl, distanceRemaining.toFixed(0));
+            smoothTextUpdate(myDistEl, distanceRemaining.toFixed(0));
 
-      // Calculate ETE if groundspeed > 0
-      const gs = myPilot.groundspeed || 0;
-      if (gs > 0 && distanceRemaining > 1) {
-        const hours = distanceRemaining / gs;
-        const hh = Math.floor(hours);
-        const mm = Math.floor((hours - hh) * 60);
-        eteString = `${hh}h ${mm}m`;
-        smoothTextUpdate(myETEEl, eteString);
-      } else {
-        smoothTextUpdate(myETEEl, '--');
-      }
+            // Calculate ETE if groundspeed > 0
+            const gs = myPilot.groundspeed || 0;
+            if (gs > 0 && distanceRemaining > 1) {
+              const hours = distanceRemaining / gs;
+              const hh = Math.floor(hours);
+              const mm = Math.floor((hours - hh) * 60);
+              eteString = `${hh}h ${mm}m`;
+              smoothTextUpdate(myETEEl, eteString);
+            } else {
+              smoothTextUpdate(myETEEl, '--');
+            }
 
-      // Update the progress bar with actual total distance
-      updateDistanceProgress(distanceFromDep, totalDistance);
-      console.log(`Distance: ${distanceRemaining.toFixed(0)} nm, ETE: ${eteString}`);
-      console.log(`Distance from departure: ${distanceFromDep.toFixed(0)} nm`);
-      console.log(`Total distance: ${totalDistance.toFixed(0)} nm`);
-    })
-    .catch(err => {
-      console.error('Distance fetch failed', err);
-    });
-} else {
-  smoothTextUpdate(myDistEl, '--');
-  smoothTextUpdate(myETEEl, '--');
-}
+            // Update the progress bar with actual total distance
+            updateDistanceProgress(distanceFromDep, totalDistance);
+            console.log(`Distance: ${distanceRemaining.toFixed(0)} nm, ETE: ${eteString}`);
+            console.log(`Distance from departure: ${distanceFromDep.toFixed(0)} nm`);
+            console.log(`Total distance: ${totalDistance.toFixed(0)} nm`);
+          })
+          .catch(err => {
+            console.error('Distance fetch failed', err);
+          });
+    } else {
+      smoothTextUpdate(myDistEl, '--');
+      smoothTextUpdate(myETEEl, '--');
+    }
   } catch (err) {
     console.error('Error fetching VATSIM stats:', err);
     myCard.style.display = 'none';
@@ -948,38 +952,39 @@ if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
 
 // ----- Helper: Display Aircraft Details in the Detailed Aircraft Card -----
 function showMyAircraftRegBox(acData) {
-  // Helper to update a table row: if value exists, set it; otherwise, hide the row.
-  function updateRow(rowId, cellId, value) {
+  function updateDetailBox(rowId, value) {
     const row = document.getElementById(rowId);
     if (row) {
       if (value && value.toString().trim() !== "" && value !== "--") {
-        document.getElementById(cellId).textContent = value;
-        row.style.display = '';
+        row.querySelector("span, pre").textContent = value;
+        row.style.display = "block"; // Show only if data exists
       } else {
-        row.style.display = 'none';
+        row.style.display = "none"; // Hide if missing
       }
     }
   }
 
-  updateRow('row-reg-registration', 'reg-registration', acData.registration || '');
-  updateRow('row-reg-icao24', 'reg-icao24', acData.icao24 || '');
-  updateRow('row-reg-selcal', 'reg-selcal', acData.selcal || '');
-  updateRow('row-reg-type', 'reg-type', acData.type || acData.ac_type || '');
-  updateRow('row-reg-operator', 'reg-operator', acData.operator.name || '');
-  updateRow('row-reg-model', 'reg-model', acData.model || '');
-  updateRow('row-reg-name', 'reg-name', acData.name || '');
-  updateRow('row-reg-engines', 'reg-engines', acData.aircraft_type.engines || '');
-  updateRow('row-reg-status', 'reg-status', acData.status || '');
+  updateDetailBox('row-reg-registration', acData.registration);
+  updateDetailBox('row-reg-icao24', acData.icao24);
+  updateDetailBox('row-reg-selcal', acData.selcal);
+  updateDetailBox('row-reg-type', acData.type || acData.ac_type);
+  updateDetailBox('row-reg-operator', acData.operator?.name);
+  updateDetailBox('row-reg-model', acData.model);
+  updateDetailBox('row-reg-name', acData.name);
+  updateDetailBox('row-reg-engines', acData.aircraft_type?.engines);
+  updateDetailBox('row-reg-status', acData.status);
 
-  let remarksVal = '--';
+  let remarksVal = "--";
   if (Array.isArray(acData.remarks)) {
-    remarksVal = acData.remarks.join('\n');
+    remarksVal = acData.remarks.join("\n");
   } else if (acData.remarks) {
     remarksVal = acData.remarks;
   }
-  updateRow('row-reg-remarks', 'reg-remarks', remarksVal);
+  updateDetailBox("row-reg-remarks", remarksVal);
 
-  document.getElementById('my-aircraft-reg-card').style.display = 'block';
+  // Show card if any details exist
+  const regCard = document.getElementById("my-aircraft-reg-card");
+  regCard.style.display = Object.values(acData).some(val => val) ? "block" : "none";
 }
 
 // ----- Helper: Update the Progress Bar -----
