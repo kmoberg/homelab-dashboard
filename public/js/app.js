@@ -928,7 +928,10 @@ if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
       }
 
       // Update the progress bar with actual total distance
-      updateDistanceProgress(totalDistance, distanceFromDep);
+      updateDistanceProgress(distanceFromDep, totalDistance);
+      console.log(`Distance: ${distanceRemaining.toFixed(0)} nm, ETE: ${eteString}`);
+      console.log(`Distance from departure: ${distanceFromDep.toFixed(0)} nm`);
+      console.log(`Total distance: ${totalDistance.toFixed(0)} nm`);
     })
     .catch(err => {
       console.error('Distance fetch failed', err);
