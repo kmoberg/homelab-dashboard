@@ -456,44 +456,53 @@ async function fetchEnzvData() {
     }
     const { current, history, trend } = data;
 
-    // 1) Update pressure, temp, wind, visibility
+    // 1) Update pressure
     let pressureStr = '--';
     if (current.altim_hpa != null && current.altim_in_hg != null) {
-      pressureStr = `${current.altim_hpa.toFixed(1)} hPa - ${current.altim_in_hg.toFixed(2)} inHg`;
+      // Round hPa to no decimals, keep inHg with 2 decimals
+      pressureStr = `${Math.round(current.altim_hpa)} hPa - ${current.altim_in_hg.toFixed(2)} inHg`;
     } else if (current.altim_hpa != null) {
-      pressureStr = `${current.altim_hpa.toFixed(1)} hPa`;
+      pressureStr = `${Math.round(current.altim_hpa)} hPa`;
     }
     smoothTextUpdate(document.getElementById('enzv-pressure'), pressureStr);
 
+    // 2) Temperature & Dew Point (unchanged)
     smoothTextUpdate(
-        document.getElementById('enzv-temp'),
-        current.temp_c != null ? current.temp_c.toFixed(1) : '--'
+      document.getElementById('enzv-temp'),
+      current.temp_c != null ? current.temp_c.toFixed(1) : '--'
     );
     smoothTextUpdate(
-        document.getElementById('enzv-dew'),
-        current.dewpoint_c != null ? current.dewpoint_c.toFixed(1) : '--'
-    );
-    smoothTextUpdate(
-        document.getElementById('enzv-vis'),
-        current.visibility_statute_mi != null
-            ? current.visibility_statute_mi.toFixed(1)
-            : '--'
+      document.getElementById('enzv-dew'),
+      current.dewpoint_c != null ? current.dewpoint_c.toFixed(1) : '--'
     );
 
+    // 3) Visibility in KM
+    if (current.visibility_statute_mi != null) {
+      // Convert from miles to km, show 1 decimal
+      const visKm = current.visibility_statute_mi * 1.609344;
+      smoothTextUpdate(
+        document.getElementById('enzv-vis'),
+        visKm.toFixed(1) + ' km'
+      );
+    } else {
+      smoothTextUpdate(document.getElementById('enzv-vis'), '--');
+    }
+
+    // 4) Wind
     let windStr = '--';
     if (current.wind_dir_deg != null && current.wind_speed_kt != null) {
       windStr = `${Math.round(current.wind_dir_deg)}° @ ${Math.round(current.wind_speed_kt)} kt`;
     }
     smoothTextUpdate(document.getElementById('enzv-wind'), windStr);
 
-    // 2) Update trend arrow
+    // 5) Update trend arrow
     const arrowEl = document.getElementById('enzv-trend-arrow');
     arrowEl.classList.remove('bi-arrow-up', 'bi-arrow-down', 'bi-dash');
     if (trend === 'up') arrowEl.classList.add('bi-arrow-up');
     else if (trend === 'down') arrowEl.classList.add('bi-arrow-down');
     else arrowEl.classList.add('bi-dash');
 
-    // 3) Update the pressure chart dynamically
+    // 6) Update the pressure chart dynamically
     buildEnzvPressureChart(history);
 
   } catch (err) {
