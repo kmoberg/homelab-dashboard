@@ -319,6 +319,7 @@ function toIsoDateString(d) {
 // 5) Electricity Prices
 let priceChart = null;
 let priceChartTomorrow = null;
+
 async function fetchPrices() {
   try {
     const res = await fetch('/api/prices');
@@ -329,8 +330,8 @@ async function fetchPrices() {
     if (data.today && data.today.prices) {
       const todayAvg = data.today.average;
       smoothTextUpdate(
-          document.getElementById('avg-price-today'),
-          todayAvg != null && !isNaN(todayAvg) ? todayAvg.toFixed(1) : '--'
+        document.getElementById('avg-price-today'),
+        todayAvg != null && !isNaN(todayAvg) ? todayAvg.toFixed(1) : '--'
       );
 
       const todayLabels = [];
@@ -345,6 +346,7 @@ async function fetchPrices() {
 
         const ore = parseFloat(item.NOK_per_kWh) * 100;
         todayValues.push(ore);
+
         if (hour === currentHour) {
           currentPriceValue = ore;
         }
@@ -352,8 +354,8 @@ async function fetchPrices() {
 
       if (currentPriceValue !== null && !isNaN(currentPriceValue)) {
         smoothTextUpdate(
-            document.getElementById('current-price'),
-            currentPriceValue.toFixed(0)
+          document.getElementById('current-price'),
+          currentPriceValue.toFixed(0)
         );
       } else {
         smoothTextUpdate(document.getElementById('current-price'), '--');
@@ -363,13 +365,16 @@ async function fetchPrices() {
     }
 
     if (data.tomorrow && data.tomorrow.prices) {
-      document.getElementById('tomorrowAverageRow').style.display = 'block';
+      // Show the 'Tomorrow' pill instead of the old 'tomorrowAverageRow'
+      document.getElementById('tomorrowPill').style.display = 'block';
+
       const tomAvg = data.tomorrow.average;
       smoothTextUpdate(
-          document.getElementById('avg-price-tomorrow'),
-          tomAvg != null && !isNaN(tomAvg) ? tomAvg.toFixed(1) : '--'
+        document.getElementById('avg-price-tomorrow'),
+        tomAvg != null && !isNaN(tomAvg) ? tomAvg.toFixed(1) : '--'
       );
 
+      // Also show tomorrow's chart container
       const tomorrowChartDiv = document.getElementById('tomorrowChartContainer');
       tomorrowChartDiv.style.display = 'block';
 
@@ -380,9 +385,11 @@ async function fetchPrices() {
         if (isNaN(startDate)) return;
         const hour = startDate.getHours();
         tLabels.push(`${hour}:00`);
+
         const ore = parseFloat(item.NOK_per_kWh) * 100;
         tValues.push(ore);
       });
+
       createPriceChart('priceChartTomorrow', tLabels, tValues, null);
     }
   } catch (err) {
@@ -408,8 +415,9 @@ function createPriceChart(canvasId, labels, prices, currentHour) {
         label: 'øre/kWh',
         data: prices,
         backgroundColor: prices.map((p, i) => {
+          // highlight the current hour in red
           if (currentHour !== null && i === currentHour) {
-            return 'rgba(255, 99, 132, 0.8)'; // Highlight current hour in red
+            return 'rgba(255, 99, 132, 0.8)';
           }
           return 'rgba(99, 132, 255, 0.6)';
         }),

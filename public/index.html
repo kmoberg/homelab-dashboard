@@ -274,27 +274,44 @@
 
 <!-- SECOND ROW for Electricity Card (fills width) -->
   <div class="card large" id="price-card">
-    <h2><i class="bi bi-lightning-charge-fill"></i> Electricity Prices (NO2)</h2>
+  <h2><i class="bi bi-lightning-charge-fill"></i> Electricity Prices (NO2)</h2>
 
-    <p>
-      <strong>Avg Price (Today):</strong>
-      <span id="avg-price-today">--</span> øre/kWh
-    </p>
-    <p style="display: none;" id="tomorrowAverageRow">
-      <strong>Avg Price (Tomorrow):</strong>
-      <span id="avg-price-tomorrow">--</span> øre/kWh
-    </p>
-    <p>
-      <strong>Current Hour Price:</strong>
-      <span id="current-price">--</span> øre/kWh
-    </p>
-    <div class="chart-container-sm">
-      <canvas id="priceChart"></canvas>
+  <!-- NEW pill-style container -->
+  <div class="price-stats">
+    <!-- Today's Average -->
+    <div class="price-pill">
+      <i class="bi bi-calendar-day"></i>
+      <p>Today's Avg</p>
+      <span id="avg-price-today">--</span>
+      <small>øre/kWh</small>
     </div>
-    <div class="chart-container-sm" id="tomorrowChartContainer" style="display: none;">
-      <canvas id="priceChartTomorrow"></canvas>
+
+    <!-- Tomorrow's Average (hidden by default) -->
+    <div class="price-pill" id="tomorrowPill" style="display: none;">
+      <i class="bi bi-calendar2-day"></i>
+      <p>Tomorrow's Avg</p>
+      <span id="avg-price-tomorrow">--</span>
+      <small>øre/kWh</small>
+    </div>
+
+    <!-- Current Hour Price -->
+    <div class="price-pill">
+      <i class="bi bi-clock"></i>
+      <p>Current Hour</p>
+      <span id="current-price">--</span>
+      <small>øre/kWh</small>
     </div>
   </div>
+
+  <!-- Keep your chart containers the same -->
+  <div class="chart-container-sm">
+    <canvas id="priceChart"></canvas>
+  </div>
+
+  <div class="chart-container-sm" id="tomorrowChartContainer" style="display: none;">
+    <canvas id="priceChartTomorrow"></canvas>
+  </div>
+</div>
 </div>
 
 <footer>

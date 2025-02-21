@@ -627,3 +627,49 @@ hr {
   font-size: 1rem;
   color: #aaa;
 }
+
+/* ==========================
+   PRICE CARD “PILL” STYLES
+   ========================== */
+.price-stats {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin-bottom: 1em;  /* spacing under the pills before the chart */
+}
+
+.price-pill {
+  background: #333;
+  padding: 10px 15px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 100px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.price-pill i {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.price-pill p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.price-pill span {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffcc00; /* same highlight color as VATSIM stats? */
+  display: block;
+  margin-top: 2px;
+}
+
+.price-pill small {
+  font-size: 0.8rem;
+  color: #aaa;
+  display: block;
+  margin-top: 1px;
+}
