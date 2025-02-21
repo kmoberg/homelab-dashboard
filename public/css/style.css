@@ -611,11 +611,10 @@ hr {
   border-radius: 10px;
   text-align: center;
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
-  min-width: 90px;
+  min-width: 100px;
 }
 
 /* ICAO Identifiers & Aircraft Names */
-.airport-bubble strong,
 .aircraft-bubble strong {
   font-size: 1.1rem;
   color: #ffcc00;
@@ -623,7 +622,6 @@ hr {
 }
 
 /* Departure, Arrival, and On-Ground Stats */
-.airport-bubble span,
 .aircraft-bubble span {
   font-size: 0.9rem;
   display: block;

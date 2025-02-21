@@ -879,9 +879,47 @@ async function fetchVatsimStats() {
         depMap[apt] = (depMap[apt] || 0) + 1;
       }
     });
-    const sortedApts = Object.entries(depMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
+    // === Process Most Popular Airports (Departures, Arrivals, On-Ground) ===
+const airportStats = {};
+
+// Collect departures, arrivals, and ground aircraft counts
+data.pilots.forEach(pilot => {
+  const dep = pilot.flight_plan?.departure?.toUpperCase().trim();
+  const arr = pilot.flight_plan?.arrival?.toUpperCase().trim();
+  const lat = pilot.latitude;
+  const lon = pilot.longitude;
+
+  if (dep) {
+    if (!airportStats[dep]) airportStats[dep] = { departures: 0, arrivals: 0, onGround: 0 };
+    airportStats[dep].departures++;
+  }
+
+  if (arr) {
+    if (!airportStats[arr]) airportStats[arr] = { departures: 0, arrivals: 0, onGround: 0 };
+    airportStats[arr].arrivals++;
+  }
+
+  // Check if the aircraft is on the ground at any of the tracked airports
+  Object.keys(airportStats).forEach(icao => {
+    if (isOnGround(pilot, { icao, lat, lon })) {
+      airportStats[icao].onGround++;
+    }
+  });
+});
+
+// Sort by total departures (descending) and take the top 5
+const sortedApts = Object.entries(airportStats)
+  .sort((a, b) => b[1].departures - a[1].departures)
+  .slice(0, 5);
+
+// Update UI with new data
+airportsListEl.innerHTML = sortedApts.length
+  ? sortedApts.map(([icao, stats]) => `
+      <div class="airport-bubble">
+        <strong>${icao}</strong>
+        <span>${stats.departures} / ${stats.arrivals} (${stats.onGround})</span>
+      </div>`).join("")
+  : `<div class="loading-text">No data available</div>`;
 
     airportsListEl.innerHTML = sortedApts.length
       ? sortedApts.map(([apt, count]) => `
