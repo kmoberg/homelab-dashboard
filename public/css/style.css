@@ -475,3 +475,22 @@ hr {
   width: 100%;
 }
 
+/* Aircraft Details Header with Status Icon */
+.aircraft-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Status Icon */
+.status-icon {
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+/* Colors for different statuses */
+.status-active { color: #00cc66; } /* Green for active */
+.status-inactive { color: #999999; } /* Gray for inactive */
+.status-stored { color: #ffa500; } /* Orange for stored */
+.status-retired { color: #ff4444; } /* Red for retired */
+.status-scrapped { color: #8b0000; } /* Dark red for scrapped */

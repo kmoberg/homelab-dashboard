@@ -974,15 +974,29 @@ function showMyAircraftRegBox(acData) {
   updateDetailBox('row-reg-model', acData.model);
   updateDetailBox('row-reg-name', acData.name);
   updateDetailBox('row-reg-engines', acData.aircraft_type?.engines);
-  updateDetailBox('row-reg-status', acData.status);
+  updateDetailBox('row-reg-remarks', Array.isArray(acData.remarks) ? acData.remarks.join("\n") : acData.remarks);
 
-  let remarksVal = "--";
-  if (Array.isArray(acData.remarks)) {
-    remarksVal = acData.remarks.join("\n");
-  } else if (acData.remarks) {
-    remarksVal = acData.remarks;
+  // Handle Aircraft Status Icon
+  const statusIcon = document.getElementById("reg-status-icon");
+  const status = acData.status ? acData.status.toLowerCase() : "unknown";
+
+  const statusClasses = {
+    "active": "status-active",
+    "inactive": "status-inactive",
+    "stored": "status-stored",
+    "retired": "status-retired",
+    "scrapped": "status-scrapped"
+  };
+
+  // Remove any previous status class
+  statusIcon.className = "bi bi-circle-fill status-icon";
+
+  if (statusClasses[status]) {
+    statusIcon.classList.add(statusClasses[status]);
+    statusIcon.setAttribute("title", status.charAt(0).toUpperCase() + status.slice(1)); // Tooltip text
+  } else {
+    statusIcon.setAttribute("title", "Unknown");
   }
-  updateDetailBox("row-reg-remarks", remarksVal);
 
   // Show card if any details exist
   const regCard = document.getElementById("my-aircraft-reg-card");

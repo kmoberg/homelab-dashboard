@@ -203,10 +203,15 @@
   </div>
 
 <!-- Row 6: Aircraft Registration Details -->
+<!-- Aircraft Details -->
 <div id="my-aircraft-reg-card" class="aircraft-reg-card" style="display:none;">
-  <h3>Aircraft Details</h3>
+  <div class="aircraft-details-header">
+    <h3>Aircraft Details</h3>
+    <i id="reg-status-icon" class="bi bi-circle-fill status-icon" title="Unknown"></i>
+  </div>
   <div class="aircraft-details-grid">
-    <div id="row-reg-registration" class="detail-box"><strong>Reg:</strong><br /> <span id="reg-registration">--</span></div>
+    <div id="row-reg-registration" class="detail-box"><strong>Reg:</strong><br />
+      <span id="reg-registration">--</span></div>
     <div id="row-reg-icao24" class="detail-box"><strong>ICAO24:</strong><br /> <span id="reg-icao24">--</span></div>
     <div id="row-reg-selcal" class="detail-box"><strong>SELCAL:</strong><br /> <span id="reg-selcal">--</span></div>
     <div id="row-reg-type" class="detail-box"><strong>Type:</strong><br /> <span id="reg-type">--</span></div>
@@ -214,7 +219,6 @@
     <div id="row-reg-model" class="detail-box"><strong>Model:</strong><br /> <span id="reg-model">--</span></div>
     <div id="row-reg-name" class="detail-box"><strong>Name:</strong><br /> <span id="reg-name">--</span></div>
     <div id="row-reg-engines" class="detail-box"><strong>Engines:</strong><br /> <span id="reg-engines">--</span></div>
-    <div id="row-reg-status" class="detail-box"><strong>Status:</strong><br /> <span id="reg-status">--</span></div>
     <div id="row-reg-remarks" class="detail-box full-width"><strong>Remarks:</strong><br /> <pre id="reg-remarks">--</pre></div>
   </div>
 </div>
