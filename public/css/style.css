@@ -38,12 +38,12 @@ h1 {
   border-radius: 8px;
   padding: 20px;
   min-width: 250px;
-  max-width: 450px;
+  max-width: 500px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 .card.large {
   /* This card fills the container width if it's alone */
-  flex: 1 1 0%;
+  flex: 1 1 0;
   max-width: 1200px; /* or 100% if you want the absolute full width */
 }
 .card h2 {
@@ -334,9 +334,8 @@ hr {
 /* VATSIM Stats + Tracker in One Column */
 /* Ensure VATSIM column is properly sized */
 #vatsim-column {
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
-  flex: 1; /* Allows it to take available space */
   display: flex;
   flex-direction: column;
   gap: 20px; /* Keeps spacing between elements */
@@ -360,7 +359,6 @@ hr {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 15px;
   width: 100%;
 }
 
@@ -507,7 +505,6 @@ hr {
 
 /* General styling for the VATSIM stats card */
 .vatsim-stats-card {
-  padding: 20px;
   background: linear-gradient(135deg, #2c2c2c, #1e1e1e);
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
