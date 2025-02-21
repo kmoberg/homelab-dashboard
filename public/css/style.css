@@ -462,3 +462,15 @@ hr {
   text-align: left;
   padding: 8px;
 }
+
+/* Limit Electricity Prices card to 500px */
+#price-card {
+  max-width: 500px;
+  width: 100%;
+}
+
+/* Limit VATSIM card to 500px */
+#vatsim-card {
+  max-width: 500px;
+  width: 100%;
+}
