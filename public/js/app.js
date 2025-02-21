@@ -849,7 +849,6 @@ async function fetchVatsimStats() {
   const aircraftListEl = document.getElementById("vatsim-aircraft-list");
   const favoriteAirportsEl = document.getElementById("vatsim-favorite-airports");
 
-  // Ensure essential elements exist
   if (!myCard || !myCallsignEl || !myAltEl || !myDistEl || !myETEEl) {
     console.error("VATSIM status elements are missing from the DOM.");
     return;
@@ -857,23 +856,21 @@ async function fetchVatsimStats() {
 
   try {
     const resp = await fetch(VATSIM_DATA_URL);
-    if (!resp.ok) {
-      throw new Error(`HTTP ${resp.status}`);
-    }
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     console.log(`[VATSIM Stats] Updated at ${new Date().toLocaleTimeString()}`);
 
     // Extract global stats
     const totalClients = data.general.connected_clients || 0;
-    const totalPilots = data.pilots ? data.pilots.length : 0;
-    const totalAtc = data.controllers ? data.controllers.length : 0;
+    const totalPilots = data.pilots?.length || 0;
+    const totalAtc = data.controllers?.length || 0;
 
     // Update VATSIM Summary Stats
     smoothTextUpdate(totalClientsEl, totalClients);
     smoothTextUpdate(totalPilotsEl, totalPilots);
     smoothTextUpdate(totalAtcEl, totalAtc);
 
-    // Process Most Popular Airports
+    // === Process Most Popular Airports ===
     const depMap = {};
     data.pilots.forEach(p => {
       const dep = p.flight_plan?.departure;
@@ -882,39 +879,19 @@ async function fetchVatsimStats() {
         depMap[apt] = (depMap[apt] || 0) + 1;
       }
     });
-    const sortedApts = Object.entries(depMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const sortedApts = Object.entries(depMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
 
-    // Process Most Popular Airports
-airportsListEl.innerHTML = sortedApts.length
-  ? sortedApts.map(([apt, count]) => `
-      <div class="airport-bubble">
-        <strong>${apt}</strong>
-        <span>${count} Departures</span>
-      </div>`).join("")
-  : `<div class="loading-text">No data available</div>`;
+    airportsListEl.innerHTML = sortedApts.length
+      ? sortedApts.map(([apt, count]) => `
+          <div class="airport-bubble">
+            <strong>${apt}</strong>
+            <span>${count} Departures</span>
+          </div>`).join("")
+      : `<div class="loading-text">No data available</div>`;
 
-// Process Most Popular Aircraft
-aircraftListEl.innerHTML = sortedAcft.length
-  ? sortedAcft.map(([fam, count]) => `
-      <div class="aircraft-bubble">
-        <strong>${fam}</strong>
-        <span>${count} Flights</span>
-      </div>`).join("")
-  : `<div class="loading-text">No data available</div>`;
-
-// Process Favorite Airports
-favoriteAirportsEl.innerHTML = trackedAirports.length
-  ? trackedAirports.map(a => {
-      const s = stats[a.icao];
-      return `
-        <div class="airport-bubble">
-          <strong>${s.icao}</strong>
-          <span>${s.departures} / ${s.arrivals} (${s.onGround})</span>
-        </div>`;
-    }).join("")
-  : `<div class="loading-text">No data available</div>`;
-
-    // Process Most Popular Aircraft
+    // === Process Most Popular Aircraft ===
     const acftMap = {};
     data.pilots.forEach(p => {
       const short = p.flight_plan?.aircraft_short;
@@ -922,13 +899,19 @@ favoriteAirportsEl.innerHTML = trackedAirports.length
       const fam = getAircraftFamily(short);
       acftMap[fam] = (acftMap[fam] || 0) + 1;
     });
-    const sortedAcft = Object.entries(acftMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const sortedAcft = Object.entries(acftMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
 
     aircraftListEl.innerHTML = sortedAcft.length
-      ? sortedAcft.map(([fam, count]) => `<li><strong>${fam}</strong> - ${count} flights</li>`).join("")
-      : "<li>No data available</li>";
+      ? sortedAcft.map(([fam, count]) => `
+          <div class="aircraft-bubble">
+            <strong>${fam}</strong>
+            <span>${count} Flights</span>
+          </div>`).join("")
+      : `<div class="loading-text">No data available</div>`;
 
-    // Process Favorite Airports
+    // === Process Favorite Airports ===
     const stats = {};
     trackedAirports.forEach(a => {
       stats[a.icao] = { icao: a.icao, name: a.name, departures: 0, arrivals: 0, onGround: 0 };
@@ -940,20 +923,22 @@ favoriteAirportsEl.innerHTML = trackedAirports.length
       if (stats[dep]) stats[dep].departures++;
       if (stats[arr]) stats[arr].arrivals++;
       trackedAirports.forEach(apt => {
-        if (isOnGround(pilot, apt)) {
-          stats[apt.icao].onGround++;
-        }
+        if (isOnGround(pilot, apt)) stats[apt.icao].onGround++;
       });
     });
 
     favoriteAirportsEl.innerHTML = trackedAirports.length
       ? trackedAirports.map(a => {
           const s = stats[a.icao];
-          return `<li><strong>${s.icao}</strong>: ${s.departures} departures, ${s.arrivals} arrivals</li>`;
+          return `
+            <div class="airport-bubble">
+              <strong>${s.icao}</strong>
+              <span>${s.departures} / ${s.arrivals} (${s.onGround})</span>
+            </div>`;
         }).join("")
-      : "<li>No data available</li>";
+      : `<div class="loading-text">No data available</div>`;
 
-    // Fetch My Personal VATSIM Data
+    // === Fetch My Personal VATSIM Data ===
     const myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
     if (!myPilot) {
       myCard.style.display = 'none';
@@ -963,38 +948,10 @@ favoriteAirportsEl.innerHTML = trackedAirports.length
 
     updateVatsimTracker(myPilot);
 
-    const plan = myPilot.flight_plan || {};
-    const cSign = myPilot.callsign || '??';
-    const acft = plan.aircraft || '--';
-    const dep = plan.departure || '--';
-    const arr = plan.arrival || '--';
-    const alt = myPilot.altitude || 0;
-    const remarks = plan.remarks || "";
-    const acftShort = plan.aircraft_short || acft;
-
-    // Update Callsign & Aircraft Details
-    smoothTextUpdate(myCallsignEl, cSign);
-    smoothTextUpdate(document.getElementById('my-aircraft'), acftShort);
-    smoothTextUpdate(document.getElementById('my-dep'), dep);
-    smoothTextUpdate(document.getElementById('my-dest'), arr);
-    smoothTextUpdate(myAltEl, alt.toString());
-
-    // Extract & Fetch Aircraft Registration
-    const regMatch = remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
-    if (regMatch) {
-      const foundReg = regMatch[1].toUpperCase();
-      fetch(`/api/aircraft/${foundReg}`)
-        .then(r => r.json())
-        .then(acData => showMyAircraftRegBox(acData))
-        .catch(() => document.getElementById('my-aircraft-reg-card').style.display = 'none');
-    } else {
-      document.getElementById('my-aircraft-reg-card').style.display = 'none';
-    }
-
-    // Distance, ETE & Progress Bar Calculations
-    if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
-      const depKey = dep.toUpperCase();
-      const arrKey = arr.toUpperCase();
+    // Distance & ETE Updates
+    if (myPilot.flight_plan?.arrival !== '--' && myPilot.latitude && myPilot.longitude) {
+      const depKey = myPilot.flight_plan.departure?.toUpperCase();
+      const arrKey = myPilot.flight_plan.arrival?.toUpperCase();
       const pilotLat = myPilot.latitude;
       const pilotLon = myPilot.longitude;
 
