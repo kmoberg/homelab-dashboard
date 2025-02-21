@@ -995,6 +995,43 @@ function updateDistanceProgress(distanceFromDep, totalDistance) {
   }
 }
 
+function getFlightPhase(altitude, vspeed) {
+  if (vspeed > 500) return "Climbing";
+  if (vspeed < -500) return "Descending";
+  if (altitude > 20000) return "Cruising";
+  return "Level Flight";
+}
+
+
+function updateVatsimTracker(myPilot) {
+  // Set callsign
+  smoothTextUpdate(document.getElementById("my-callsign"), myPilot.callsign);
+
+  // Update origin and destination
+  smoothTextUpdate(document.getElementById("my-dep"), myPilot.flight_plan.departure);
+  smoothTextUpdate(document.getElementById("my-dest"), myPilot.flight_plan.arrival);
+
+  // Update flight phase
+  const phase = getFlightPhase(myPilot.altitude, myPilot.vertical_speed);
+  smoothTextUpdate(document.getElementById("my-phase"), phase);
+
+  // Update distance data
+  smoothTextUpdate(document.getElementById("my-dist-from-origin"), myPilot.distance_from_dep.toFixed(0));
+  smoothTextUpdate(document.getElementById("my-total-dist"), myPilot.total_distance.toFixed(0));
+  smoothTextUpdate(document.getElementById("my-dist-remaining"), myPilot.distance_remaining.toFixed(0));
+  smoothTextUpdate(document.getElementById("my-ete"), myPilot.ete);
+
+  // Update flight details
+  smoothTextUpdate(document.getElementById("my-altitude"), myPilot.altitude);
+  smoothTextUpdate(document.getElementById("my-groundspeed"), myPilot.groundspeed);
+  smoothTextUpdate(document.getElementById("my-heading"), myPilot.heading);
+  smoothTextUpdate(document.getElementById("my-vs"), myPilot.vertical_speed);
+  smoothTextUpdate(document.getElementById("my-aircraft"), myPilot.flight_plan.aircraft_short);
+
+  // Update progress bar
+  updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
+}
+
 // ==========================
 // On Page Load
 // ==========================

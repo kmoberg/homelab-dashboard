@@ -160,28 +160,62 @@
 <!-- VATSIM Column (Stats + Tracker) -->
 <div class="card-column" id="vatsim-column">
 
-  <!-- My personal VATSIM Tracker (Moved inside same column) -->
-  <div class="card" id="my-vatsim-card" style="display:none;">
-    <div class="vatsim-status-header">
-      <h2 id="my-callsign" class="highlighted-callsign">
-        <i class="bi bi-airplane"></i> <span>--</span>
-      </h2>
-      <div class="route">
-        <span id="my-dep">--</span> → <span id="my-dest">--</span>
-      </div>
+  <!-- My Personal VATSIM Tracker -->
+<div class="card" id="my-vatsim-card" style="display:none;">
+  <!-- Row 1: Header with Callsign -->
+  <div class="vatsim-status-header">
+    <h2 id="my-callsign" class="highlighted-callsign">
+      <i class="bi bi-airplane"></i> <span>--</span>
+    </h2>
+  </div>
+
+  <!-- Row 2: Route and Flight Phase -->
+  <div class="vatsim-route-info">
+    <span id="my-dep" class="route-box">--</span>
+    <span id="my-phase" class="phase-box">--</span>
+    <span id="my-dest" class="route-box">--</span>
+  </div>
+
+  <!-- Row 3: Progress Bar -->
+  <div class="progress-bar-container">
+    <div id="distance-progress-bar" class="progress-bar-fill"></div>
+  </div>
+
+  <!-- Row 4: Distance and ETA Information -->
+  <div class="distance-info">
+    <div class="left">
+      <p><strong>From:</strong> <span id="my-dist-from-origin">--</span> nm</p>
+      <p><strong>Total:</strong> <span id="my-total-dist">--</span> nm</p>
     </div>
-    <div class="vatsim-route-summary">
-      <p><strong>Aircraft:</strong> <span id="my-aircraft">--</span></p>
-    </div>
-    <div class="vatsim-status-body">
-      <p><strong>Altitude:</strong> <span id="my-altitude">--</span></p>
-      <p><strong>Distance Remaining:</strong> <span id="my-dist-remaining">--</span> nm</p>
-      <p><strong>ETE:</strong> <span id="my-ete">--</span></p>
-    </div>
-    <div class="progress-bar-container">
-      <div id="distance-progress-bar" class="progress-bar-fill"></div>
+    <div class="right">
+      <p><strong>ETA:</strong> <span id="my-ete">--</span></p>
+      <p><strong>Remaining:</strong> <span id="my-dist-remaining">--</span> nm</p>
     </div>
   </div>
+
+  <!-- Row 5: Flight Details Grid -->
+  <div class="flight-details-grid">
+    <div class="detail-box"><strong>Alt:</strong> <span id="my-altitude">--</span> ft</div>
+    <div class="detail-box"><strong>GS:</strong> <span id="my-groundspeed">--</span> kt</div>
+    <div class="detail-box"><strong>HDG:</strong> <span id="my-heading">--</span>°</div>
+    <div class="detail-box"><strong>VS:</strong> <span id="my-vs">--</span> fpm</div>
+    <div class="detail-box"><strong>Aircraft:</strong> <span id="my-aircraft">--</span></div>
+  </div>
+
+  <!-- Row 6: Aircraft Registration Details -->
+  <div id="my-aircraft-reg-card" class="aircraft-reg-card" style="display:none;">
+    <h3>Aircraft Details</h3>
+    <table class="custom-table">
+      <tbody>
+        <tr><td><strong>Registration:</strong></td><td id="reg-registration">--</td></tr>
+        <tr><td><strong>ICAO24:</strong></td><td id="reg-icao24">--</td></tr>
+        <tr><td><strong>SELCAL:</strong></td><td id="reg-selcal">--</td></tr>
+        <tr><td><strong>Operator:</strong></td><td id="reg-operator">--</td></tr>
+        <tr><td><strong>Model:</strong></td><td id="reg-model">--</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
   <!-- VATSIM Stats Card -->
   <div class="card" id="vatsim-card">
