@@ -892,58 +892,60 @@ async function fetchVatsimStats() {
     let eteString = '--';
 
     if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
-      const depKey = dep.trim().toUpperCase();
-      const arrKey = arr.trim().toUpperCase();
-      const pilotLat = myPilot.latitude;
-      const pilotLon = myPilot.longitude;
+  const depKey = dep.trim().toUpperCase();
+  const arrKey = arr.trim().toUpperCase();
+  const pilotLat = myPilot.latitude;
+  const pilotLon = myPilot.longitude;
 
-      // Fetch distance to destination
-      const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
-          .then(r => r.json());
+  // Fetch distance to destination
+  const arrDistancePromise = fetch(`/api/distance?icao=${arrKey}&lat=${pilotLat}&lon=${pilotLon}`)
+    .then(r => r.json());
 
-      // Fetch distance from departure
-      const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`)
-          .then(r => r.json());
+  // Fetch distance from departure
+  const depDistancePromise = fetch(`/api/distance?icao=${depKey}&lat=${pilotLat}&lon=${pilotLon}`)
+    .then(r => r.json());
 
-      // Process both distances
-      Promise.all([arrDistancePromise, depDistancePromise])
-          .then(([arrDistData, depDistData]) => {
-            if (arrDistData.error || depDistData.error) {
-              console.warn('Distance error:', arrDistData.error || depDistData.error);
-              return;
-            }
+  // Wait for both distance fetches
+  Promise.all([arrDistancePromise, depDistancePromise])
+    .then(([arrDistData, depDistData]) => {
+      if (arrDistData.error || depDistData.error) {
+        console.warn('Distance error:', arrDistData.error || depDistData.error);
+        return;
+      }
 
-            const distanceFromDep = depDistData.distanceNm;
-            const distanceRemaining = arrDistData.distanceNm;
-            const totalDistance = distanceFromDep + distanceRemaining;
+      // Assign computed distances
+      myPilot.distance_from_dep = depDistData.distanceNm;
+      myPilot.distance_remaining = arrDistData.distanceNm;
+      myPilot.total_distance = myPilot.distance_from_dep + myPilot.distance_remaining;
 
-            smoothTextUpdate(myDistEl, distanceRemaining.toFixed(0));
+      // Calculate ETE if groundspeed > 0
+      if (myPilot.groundspeed > 0 && myPilot.distance_remaining > 1) {
+        const hours = myPilot.distance_remaining / myPilot.groundspeed;
+        const hh = Math.floor(hours);
+        const mm = Math.floor((hours - hh) * 60);
+        myPilot.ete = `${hh}h ${mm}m`;
+      } else {
+        myPilot.ete = "--";
+      }
 
-            // Calculate ETE if groundspeed > 0
-            const gs = myPilot.groundspeed || 0;
-            if (gs > 0 && distanceRemaining > 1) {
-              const hours = distanceRemaining / gs;
-              const hh = Math.floor(hours);
-              const mm = Math.floor((hours - hh) * 60);
-              eteString = `${hh}h ${mm}m`;
-              smoothTextUpdate(myETEEl, eteString);
-            } else {
-              smoothTextUpdate(myETEEl, '--');
-            }
+      // Update progress bar
+      updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
 
-            // Update the progress bar with actual total distance
-            updateDistanceProgress(distanceFromDep, totalDistance);
-            console.log(`Distance: ${distanceRemaining.toFixed(0)} nm, ETE: ${eteString}`);
-            console.log(`Distance from departure: ${distanceFromDep.toFixed(0)} nm`);
-            console.log(`Total distance: ${totalDistance.toFixed(0)} nm`);
-          })
-          .catch(err => {
-            console.error('Distance fetch failed', err);
-          });
-    } else {
-      smoothTextUpdate(myDistEl, '--');
-      smoothTextUpdate(myETEEl, '--');
-    }
+      // Ensure UI updates
+      updateVatsimTracker(myPilot);
+    })
+    .catch(err => {
+      console.error('Distance fetch failed', err);
+    });
+} else {
+  // If no valid position or route, update UI with placeholders
+  myPilot.distance_from_dep = "--";
+  myPilot.distance_remaining = "--";
+  myPilot.total_distance = "--";
+  myPilot.ete = "--";
+
+  updateVatsimTracker(myPilot);
+}
   } catch (err) {
     console.error('Error fetching VATSIM stats:', err);
     myCard.style.display = 'none';
