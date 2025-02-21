@@ -38,7 +38,7 @@ h1 {
   border-radius: 8px;
   padding: 20px;
   min-width: 250px;
-  max-width: 400px;
+  max-width: 450px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 .card.large {
@@ -340,12 +340,6 @@ hr {
   display: flex;
   flex-direction: column;
   gap: 20px; /* Keeps spacing between elements */
-}
-
-/* Ensure all cards inside VATSIM column fill width */
-#vatsim-column .card {
-  width: 100%;
-  max-width: 450px;
 }
 
 /* Responsive Layout: Adjust for smaller screens */
