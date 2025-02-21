@@ -1,3 +1,6 @@
+/* ==========================
+   GLOBAL STYLES & LAYOUT
+   ========================== */
 body {
   margin: 0;
   padding: 0;
@@ -8,86 +11,14 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
 header {
   text-align: center;
   margin: 20px 0;
 }
+
 h1 {
   margin-bottom: 0.2em;
-}
-/* Row container for cards on the top row */
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  max-width: 95vw;
-  margin: 20px;
-}
-/* A separate container for the electricity card row */
-.card-container.single {
-  max-width: 95vw;
-  width: 500px;
-  margin: 20px;
-  display: flex;
-  justify-content: center;
-}
-.card {
-  background-color: #2c2c2c;
-  border-radius: 8px;
-  padding: 20px;
-  min-width: 250px;
-  max-width: 400px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-.card.large {
-  /* This card fills the container width if it's alone */
-  flex: 1 1 0%;
-  max-width: 1200px; /* or 100% if you want the absolute full width */
-}
-.card h2 {
-  margin-top: 0;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.card pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  max-width: 100%;
-  overflow: auto;
-}
-.time-display {
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-align: center;
-  margin: 10px 0;
-}
-.weather-info p,
-.sun-info p,
-.comparison-info p {
-  margin: 0.5em 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.wind-direction {
-  display: inline-block;
-  transform: rotate(0deg);
-  margin-left: 0.5em;
-}
-
-/* Standard chart container (for smaller charts) */
-.chart-container,
-.chart-container-sm {
-  /* Let them fill the card width entirely */
-  width: 100%;
-  height: 400px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  position: relative; /* recommended for responsive charts */
 }
 
 footer {
@@ -96,62 +27,78 @@ footer {
   font-size: 0.9rem;
 }
 
-/* Forecast table styling */
-.forecast-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.forecast-table th,
-.forecast-table td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #444;
-}
-.forecast-table th {
-  background-color: #3a3a3a;
-}
-.forecast-table caption {
-  text-align: left;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-hr {
-  margin: 2em 1em;
+/* ==========================
+   CONTAINER & CARD LAYOUT
+   ========================== */
+
+/* Main container for cards */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Ensures even spacing */
+  gap: 20px;
+  max-width: 95vw;
+  margin: 20px;
+  align-items: flex-start; /* Aligns columns properly */
 }
 
-/* flight rule dot (METAR) */
-.flight-rule-dot {
-  display: inline-block;
-  width: 0.75em; /* or 1em */
-  height: 0.75em;
-  border-radius: 50%;
-  margin-right: 0.5em;
+/* Single column container for full-width cards */
+.card-container.single {
+  max-width: 95vw;
+  width: 500px;
+  margin: 20px;
+  display: flex;
+  justify-content: center;
 }
 
-/* wind icon (METAR) */
-.wind-icon {
-  display: inline-block;
+/* Standard card design */
+.card {
+  background-color: #2c2c2c;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 250px;
+  max-width: 400px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-/* Our weather symbol images for MET next_1h, next_6h, next_12h */
-.symbol-img {
-  width: 40px;
-  height: 40px;
-  vertical-align: middle;
-  margin-right: 8px;
+/* Larger cards that should take full available width */
+.card.large {
+  flex: 1 1 0%;
+  max-width: 1200px;
 }
 
-/* The container to center it or size it as you wish */
+/* Card Headers */
+.card h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==========================
+   WEATHER & METAR DISPLAY
+   ========================== */
+.weather-info p,
+.sun-info p,
+.comparison-info p {
+  margin: 0.5em 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Wind Compass */
 .wind-compass-container {
   display: flex;
-  justify-content: center; /* center horizontally */
-  margin: 1em 0; /* spacing around the compass */
+  justify-content: center;
+  margin: 1em 0;
 }
 
-/* The circular compass "face" */
 .wind-compass {
   position: relative;
-  width: 120px;   /* adjust size to your liking */
+  width: 120px;
   height: 120px;
   border: 2px solid #ccc;
   border-radius: 50%;
@@ -159,110 +106,45 @@ hr {
   box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 
-/* The arrow we rotate based on wind direction */
+/* Wind Arrow */
 .compass-arrow {
   position: absolute;
-  width: 2px;              /* the thickness of the arrow line */
-  height: 50px;            /* length of the arrow "line" */
-  background-color: red;   /* arrow color */
-  top: 10px;               /* position the arrow's top near center, so rotation pivot is near bottom */
+  width: 2px;
+  height: 50px;
+  background-color: red;
+  top: 10px;
   left: 50%;
-  transform-origin: 50% 90%; /* pivot near the bottom of the arrow */
-  /* By default we might point "north" (arrow up). We'll rotate in JS. */
+  transform-origin: 50% 90%;
 }
 
-/* The wind speed label in center (slightly below the middle) */
+/* Wind Speed Label */
 .wind-speed-label {
   position: absolute;
   width: 100%;
-  top: 56%;  /* near the center, adjust as needed */
+  top: 56%;
   text-align: center;
-  font-size: 1.2rem;  /* bigger text */
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
-/* Cardinal labels (N/E/S/W) */
-.compass-label {
-  position: absolute;
-  font-weight: bold;
-  color: #ccc;
-}
-
-/* Place N at the top (centered horizontally) */
-.compass-n {
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* Place E on the right (centered vertically) */
-.compass-e {
-  right: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Place S at the bottom */
-.compass-s {
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* Place W on the left */
-.compass-w {
-  left: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Fade classes (if not already present) */
-.fade {
-  transition: opacity 0.3s ease-in-out;
-  opacity: 1;
-}
-.fade-updating {
-  opacity: 0;
-}
-
-/* A custom class for your table styling */
-.custom-table {
+/* ==========================
+   VATSIM COLUMN & CARDS
+   ========================== */
+#vatsim-column {
+  max-width: 500px;
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 1em;
-  background-color: #2c2c2c; /* match your dark background or #2c2c2c */
-  color: #f0f0f0;            /* text color */
-  font-size: 0.95rem;        /* slightly smaller text if you like */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.custom-table th,
-.custom-table td {
-  border: 1px solid #444;
-  padding: 8px;
-  text-align: center;
+/* Ensure all VATSIM cards take full width */
+#vatsim-column .card {
+  width: 100%;
 }
 
-/* Make the thead a bit darker or highlight it */
-.custom-table thead {
-  background-color: #444; /* a bit darker than the body */
-}
-.custom-table thead th {
-  color: #fff;
-  font-weight: bold;
-}
-
-.custom-table tbody tr:nth-child(even) {
-  background-color: #3a3a3a;
-}
-
-/* Rotate airplane icon for departures */
-.airplane-rotated {
-  display: inline-block;
-  transform: rotate(45deg);
-  margin-right: 4px; /* small spacing before text */
-}
-
-/* VATSIM Status Card Enhancements */
+/* VATSIM Status Header */
 .vatsim-status-header {
   background-color: #3a3a3a;
   padding: 10px;
@@ -270,103 +152,20 @@ hr {
   margin-bottom: 10px;
   text-align: center;
 }
+
+/* Callsign Highlight */
 .highlighted-callsign {
-  font-size: 3.5rem; /* Make it larger */
-  color: #ffcc00; /* Highlight color */
+  font-size: 3.5rem;
+  color: #ffcc00;
   font-weight: bold;
-  margin: 10px 0; /* Adjust spacing */
   text-align: center;
   display: flex;
   align-items: center;
-  justify-content: center; /* Ensure it's truly centered */
-  gap: 10px; /* Add space between icon and text */
-}
-
-#my-aircraft-summary {
-  font-size: 1.1rem;
-  margin: 5px 0;
-}
-
-/* Progress Bar */
-.progress-bar-container {
-  width: 100%;
-  height: 20px;
-  background-color: #444;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 10px;
-}
-.progress-bar-fill {
-  height: 100%;
-  background-color: #00cc66;
-  width: 0%;
-  transition: width 0.5s ease-in-out;
-}
-
-/* Aircraft Details Table (in the aircraft reg card) */
-#my-aircraft-reg-card table.custom-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-#my-aircraft-reg-card table.custom-table td,
-#my-aircraft-reg-card table.custom-table th {
-  border: 1px solid #555;
-  padding: 6px 8px;
-  text-align: left;
-}
-#my-aircraft-reg-card table.custom-table th {
-  background-color: #444;
-  color: #fff;
-}
-
-/* VATSIM Status Card Enhancements */
-.vatsim-status-header .route {
-    font-size: 1.1rem;
-    margin: 5px 0;
-    border-top: 1px solid #444444;
-    border-left: 1px solid #444444;
-    border-right: 1px solid #444444;
-    padding: 5px;
-}
-
-/* VATSIM Stats + Tracker in One Column */
-/* Set VATSIM column to fixed width */
-#vatsim-column {
-  max-width: 500px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* Adds spacing between cards */
-}
-
-/* Ensure all cards inside VATSIM column take full width */
-#vatsim-column .card {
-  width: 100%;
-}
-
-/* Responsive: Adjust layout for smaller screens */
-@media (max-width: 768px) {
-  .card-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #vatsim-column {
-    width: 90%;
-  }
-}
-
-/* General Styling for VATSIM Tracker */
-#my-vatsim-card {
-  display: flex;
-  flex-direction: column;
+  justify-content: center;
   gap: 10px;
-  padding: 15px;
-  width: 100%;
 }
 
-/* Row 2: Route & Phase */
+/* VATSIM Flight Phase & Route */
 .vatsim-route-info {
   display: flex;
   justify-content: space-between;
@@ -374,21 +173,17 @@ hr {
   font-size: 1.1rem;
   text-align: center;
 }
-.route-box {
+
+.route-box, .phase-box {
   flex: 1;
   background-color: #444;
   padding: 5px;
   border-radius: 5px;
 }
-.phase-box {
-  flex: 1;
-  background-color: #666;
-  padding: 5px;
-  border-radius: 5px;
-  font-weight: bold;
-}
 
-/* Row 3: Progress Bar */
+/* ==========================
+   VATSIM PROGRESS BAR
+   ========================== */
 .progress-bar-container {
   width: 100%;
   height: 15px;
@@ -396,6 +191,7 @@ hr {
   border-radius: 10px;
   overflow: hidden;
 }
+
 .progress-bar-fill {
   height: 100%;
   background-color: #00cc66;
@@ -403,46 +199,21 @@ hr {
   transition: width 0.5s ease-in-out;
 }
 
-/* Row 4: Distance & ETA */
-.distance-info {
-  display: flex;
-  justify-content: space-between;
-  padding: 5px;
-}
-.distance-info .left, .distance-info .right {
-  width: 48%;
-}
-
-/* Row 5: Flight Details Grid */
-.flight-details-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-.detail-box {
-  flex: 1;
-  min-width: 90px;
-  text-align: center;
-  padding: 5px;
-  background-color: #333;
-  border-radius: 5px;
-}
-
-/* Row 6: Aircraft Registration */
+/* ==========================
+   AIRCRAFT DETAILS & STATUS
+   ========================== */
 .aircraft-reg-card {
   margin-top: 10px;
   padding: 10px;
   background-color: #3a3a3a;
   border-radius: 5px;
 }
-.aircraft-reg-card h3 {
-  text-align: center;
-  font-size: 1.1rem;
-}
-.custom-table td {
-  padding: 5px;
+
+/* Aircraft Details Header */
+.aircraft-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Aircraft Details Grid */
@@ -454,33 +225,13 @@ hr {
   margin-top: 10px;
 }
 
-.aircraft-details-grid .detail-box {
+.detail-box {
   flex: 1;
   min-width: 100px;
   text-align: center;
   padding: 5px;
   background-color: #333;
   border-radius: 5px;
-  display: none; /* Hide by default until populated */
-}
-
-.aircraft-details-grid .full-width {
-  flex: 100%;
-  text-align: left;
-  padding: 8px;
-}
-
-/* Limit Electricity Prices card to 500px */
-#price-card {
-  max-width: 500px;
-  width: 100%;
-}
-
-/* Aircraft Details Header with Status Icon */
-.aircraft-details-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* Status Icon */
@@ -489,13 +240,33 @@ hr {
   transition: color 0.3s ease;
 }
 
-#vatsim-card {
+/* Status Colors */
+.status-active { color: #00cc66; }
+.status-inactive { color: #999999; }
+.status-stored { color: #ffa500; }
+.status-retired { color: #ff4444; }
+.status-scrapped { color: #8b0000; }
+
+/* ==========================
+   ELECTRICITY PRICES CARD
+   ========================== */
+#price-card {
+  max-width: 500px;
   width: 100%;
+  flex: 1;
 }
 
-/* Colors for different statuses */
-.status-active { color: #00cc66; } /* Green for active */
-.status-inactive { color: #999999; } /* Gray for inactive */
-.status-stored { color: #ffa500; } /* Orange for stored */
-.status-retired { color: #ff4444; } /* Red for retired */
-.status-scrapped { color: #8b0000; } /* Dark red for scrapped */
+/* ==========================
+   RESPONSIVE DESIGN
+   ========================== */
+@media (max-width: 1024px) {
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #vatsim-column, #price-card {
+    width: 100%;
+    max-width: 500px;
+  }
+}
