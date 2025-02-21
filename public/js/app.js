@@ -1099,6 +1099,32 @@ function updateVatsimTracker(myPilot) {
   if (myPilot.distance_from_dep !== undefined && myPilot.total_distance !== undefined) {
     updateDistanceProgress(myPilot.distance_from_dep, myPilot.total_distance);
   }
+
+  // --- Fetch Aircraft Details for Display ---
+  const aircraftRegCard = document.getElementById("my-aircraft-reg-card");
+  if (myPilot.flight_plan?.remarks) {
+    const regMatch = myPilot.flight_plan.remarks.match(/REG\/([A-Za-z0-9\-]+)/i);
+    if (regMatch) {
+      const foundReg = regMatch[1].toUpperCase();
+      fetch(`/api/aircraft/${foundReg}`)
+        .then(r => {
+          if (!r.ok) throw new Error(`Aircraft not found: ${r.status}`);
+          return r.json();
+        })
+        .then(acData => {
+          showMyAircraftRegBox(acData);
+          aircraftRegCard.style.display = "block";
+        })
+        .catch(err => {
+          console.warn("No aircraft details for", foundReg, err);
+          aircraftRegCard.style.display = "none";
+        });
+    } else {
+      aircraftRegCard.style.display = "none";
+    }
+  } else {
+    aircraftRegCard.style.display = "none";
+  }
 }
 
 // ==========================
