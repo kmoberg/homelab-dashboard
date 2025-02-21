@@ -870,25 +870,13 @@ async function fetchVatsimStats() {
     smoothTextUpdate(totalPilotsEl, totalPilots);
     smoothTextUpdate(totalAtcEl, totalAtc);
 
-    // === Process Most Popular Airports ===
-    const depMap = {};
-    data.pilots.forEach(p => {
-      const dep = p.flight_plan?.departure;
-      if (dep) {
-        const apt = dep.toUpperCase().trim();
-        depMap[apt] = (depMap[apt] || 0) + 1;
-      }
-    });
     // === Process Most Popular Airports (Departures, Arrivals, On-Ground) ===
-// === Process Most Popular Airports (Departures, Arrivals, On-Ground) ===
 const airportStats = {};
 
 // Collect departures, arrivals, and on-ground aircraft counts
 data.pilots.forEach(pilot => {
   const dep = pilot.flight_plan?.departure?.toUpperCase().trim();
   const arr = pilot.flight_plan?.arrival?.toUpperCase().trim();
-  const lat = pilot.latitude;
-  const lon = pilot.longitude;
 
   if (dep) {
     if (!airportStats[dep]) airportStats[dep] = { departures: 0, arrivals: 0, onGround: 0 };
@@ -900,21 +888,10 @@ data.pilots.forEach(pilot => {
     airportStats[arr].arrivals++;
   }
 
-    // Initialize onGround counter for each airport
-  if (dep && !airportStats[dep]) airportStats[dep] = { departures: 0, arrivals: 0, onGround: 0 };
-  if (arr && !airportStats[arr]) airportStats[arr] = { departures: 0, arrivals: 0, onGround: 0 };
-
-  // Increase departure and arrival counts
-  if (dep) airportStats[dep].departures++;
-  if (arr) airportStats[arr].arrivals++;
-
-  // Track on-ground aircraft for each airport separately
-  trackedAirports.forEach(airport => {
-    if (isOnGround(pilot, airport)) {
-      if (!airportStats[airport.icao]) {
-        airportStats[airport.icao] = { departures: 0, arrivals: 0, onGround: 0 };
-      }
-      airportStats[airport.icao].onGround++;
+  // Check if the aircraft is on the ground at any of the top 5 airports
+  Object.keys(airportStats).forEach(icao => {
+    if (isOnGround(pilot, trackedAirports.find(a => a.icao === icao))) {
+      airportStats[icao].onGround++;
     }
   });
 });
@@ -929,9 +906,7 @@ airportsListEl.innerHTML = sortedApts.length
   ? sortedApts.map(([icao, stats]) => `
       <div class="airport-bubble">
         <strong>${icao}</strong>
-        <span>D: ${stats.departures || 0}</span>
-        <span>A: ${stats.arrivals || 0}</span>
-        <span>On Ground: ${stats.onGround || 0}</span>
+        <span>D: ${stats.departures || 0} | A: ${stats.arrivals || 0} | G: ${stats.onGround || 0}</span>
       </div>`).join("")
   : `<div class="loading-text">No data available</div>`;
 
