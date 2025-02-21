@@ -983,9 +983,12 @@ function showMyAircraftRegBox(acData) {
 }
 
 // ----- Helper: Update the Progress Bar -----
-function updateDistanceProgress(currentDist, totalDist) {
-  if (!totalDist || totalDist <= 0) return;
-  const progressPercent = Math.max(0, Math.min(100, (1 - (currentDist / totalDist)) * 100));
+function updateDistanceProgress(distanceFromDep, totalDistance) {
+  if (!totalDistance || totalDistance <= 0) return;
+
+  // Corrected formula to show the correct progress from departure to destination
+  const progressPercent = Math.max(0, Math.min(100, ((totalDistance - distanceFromDep) / totalDistance) * 100));
+
   const progressBar = document.getElementById('distance-progress-bar');
   if (progressBar) {
     progressBar.style.width = progressPercent + '%';
