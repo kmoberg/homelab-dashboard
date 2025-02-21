@@ -928,7 +928,7 @@ if (arr !== '--' && myPilot.latitude && myPilot.longitude) {
       }
 
       // Update the progress bar with actual total distance
-      updateDistanceProgress(distanceFromDep, totalDistance);
+      updateDistanceProgress(totalDistance, distanceFromDep);
     })
     .catch(err => {
       console.error('Distance fetch failed', err);
