@@ -1044,13 +1044,40 @@ async function fetchVatsimStats() {
     // -------------------------------------------------
     // 10) Fetch My Personal VATSIM Data (unchanged)
     // -------------------------------------------------
-    const myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
-    if (!myPilot) {
-      myCard.style.display = 'none';
-      return;
+    let myPilot = data.pilots.find(p => p.cid === MY_VATSIM_CID);
+    let myStatus = "OFFLINE"; // default
+
+    if (myPilot) {
+      myStatus = "ONLINE";
+    } else {
+      // If not found in pilots, check prefiles
+      const myPrefile = data.prefiles?.find(p => p.cid === MY_VATSIM_CID);
+      if (myPrefile) {
+        // Construct a "pilot-like" object so our existing logic works
+        myPilot = {
+          cid: myPrefile.cid,
+          callsign: myPrefile.callsign,
+          flight_plan: myPrefile.flight_plan || {},
+          // Prefile has no altitude/lat/lon, so set them to 0 or null
+          latitude: null,
+          longitude: null,
+          altitude: 0,
+          groundspeed: 0,
+          vertical_speed: 0,
+          heading: 0
+        };
+        myStatus = "PREFILED";
+      }
     }
-    myCard.style.display = 'block';
-    updateVatsimTracker(myPilot);
+
+    if (!myPilot) {
+      // Not in pilots or prefiles
+      myCard.style.display = 'none';
+    } else {
+      myCard.style.display = 'block';
+      myPilot.myStatus = myStatus; // store status on the pilot object
+      updateVatsimTracker(myPilot);
+    }
 
     // Distance & ETE
     if (myPilot.flight_plan?.arrival !== '--' && myPilot.latitude && myPilot.longitude) {

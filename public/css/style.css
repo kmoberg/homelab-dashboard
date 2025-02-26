@@ -719,3 +719,19 @@ hr {
   display: block;
   margin-top: 1px;
 }
+
+.status-icon {
+  font-size: 1.2em;
+  margin-right: 0.3em;
+  vertical-align: middle;
+}
+
+.status-online {
+  color: #28a745; /* green */
+}
+.status-prefiled {
+  color: #ffc107; /* yellow-ish */
+}
+.status-offline {
+  color: #adb5bd; /* gray */
+}
