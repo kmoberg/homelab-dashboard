@@ -1257,6 +1257,23 @@ function updateVatsimTracker(myPilot) {
   } else {
     aircraftRegCard.style.display = "none";
   }
+
+  const statusIcon = document.getElementById("my-status-icon");
+  if (!statusIcon) return;
+
+  // Remove old classes
+  statusIcon.classList.remove("status-online", "status-prefiled", "status-offline");
+
+  if (myPilot.myStatus === "ONLINE") {
+    statusIcon.classList.add("status-online");
+    statusIcon.title = "Online";
+  } else if (myPilot.myStatus === "PREFILED") {
+    statusIcon.classList.add("status-prefiled");
+    statusIcon.title = "Prefiled";
+  } else {
+    statusIcon.classList.add("status-offline");
+    statusIcon.title = "Offline";
+  }
 }
 
 // ==========================
