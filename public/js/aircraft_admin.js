@@ -19,7 +19,13 @@ async function loadRegistrations() {
     if (!response.ok) {
       throw new Error(`Error fetching aircraft. Status: ${response.status}`);
     }
-    const aircraftList = await response.json();
+
+    // The server returns an object like:
+    // { "aircraft": [...], "count": 20 }
+    // So extract the array
+    const data = await response.json();
+    const aircraftList = data.aircraft;
+
     populateRegistrationTable(aircraftList);
   } catch (err) {
     console.error('Failed to load registrations:', err);
