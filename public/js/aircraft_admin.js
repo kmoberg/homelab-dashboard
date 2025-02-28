@@ -56,7 +56,7 @@ function populateRegistrationTable(list) {
  */
 async function loadAircraftTypes() {
   try {
-    const response = await fetch('/api/aircraft_type');
+    const response = await fetch('/api/aircraft_types');
     if (!response.ok) {
       throw new Error(`Error fetching aircraft types. Status: ${response.status}`);
     }
