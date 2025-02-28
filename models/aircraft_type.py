@@ -16,12 +16,6 @@ class AircraftType(db.Model):
     type_designator = db.Column(db.String(10), nullable=True)  # Another code or designator
     description = db.Column(db.Text(), nullable=True)
 
-    # Relationship to all Aircraft referencing this type
-    aircraft_list = db.relationship(
-        "Aircraft",
-        back_populates="aircraft_type"
-    )
-
     def to_dict(self):
         return {
             "id": self.id,

@@ -14,7 +14,6 @@ class Airline(db.Model):
     country = db.Column(db.String(100), nullable=True)
 
     # Relationships
-    aircraft = db.relationship("Aircraft", backref="airline", lazy=True)
     hubs = db.relationship("AirlineHub", backref="airline", lazy=True)
 
     def to_dict(self):
