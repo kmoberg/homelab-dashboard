@@ -1,4 +1,5 @@
 # models/aircraft_type.py
+
 from db import db
 
 class AircraftType(db.Model):
@@ -12,8 +13,14 @@ class AircraftType(db.Model):
     manufacturer = db.Column(db.String(100), nullable=False)
     model_name = db.Column(db.String(100), nullable=False)
     engines = db.Column(db.String(100), nullable=True)
-    type_designator = db.Column(db.String(10), nullable=True)  # ICAO aircraft code
+    type_designator = db.Column(db.String(10), nullable=True)  # Another code or designator
     description = db.Column(db.Text(), nullable=True)
+
+    # Relationship to all Aircraft referencing this type
+    aircraft_list = db.relationship(
+        "Aircraft",
+        back_populates="aircraft_type"
+    )
 
     def to_dict(self):
         return {
@@ -22,6 +29,6 @@ class AircraftType(db.Model):
             "manufacturer": self.manufacturer,
             "model_name": self.model_name,
             "engines": self.engines,
-            "type_designator": self.type_code,
+            "type_designator": self.type_designator,
             "description": self.description,
         }
