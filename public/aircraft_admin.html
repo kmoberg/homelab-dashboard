@@ -59,7 +59,7 @@
   <form id="new-registration-form">
     <div style="display: flex; flex-wrap: wrap; gap: 20px;">
 
-      <!-- Registration -->
+      <!-- Registration (PRIMARY KEY) -->
       <div style="flex: 1 1 250px;">
         <label for="regInput"><strong>Registration:</strong></label><br/>
         <input
@@ -72,7 +72,7 @@
         />
       </div>
 
-      <!-- ICAO24 (optional) -->
+      <!-- ICAO24 -->
       <div style="flex: 1 1 250px;">
         <label for="icao24Input"><strong>ICAO24 (hex):</strong></label><br/>
         <input
@@ -84,22 +84,139 @@
         />
       </div>
 
-      <!-- Aircraft Type dropdown -->
+      <!-- SELCAL -->
+      <div style="flex: 1 1 250px;">
+        <label for="selcalInput"><strong>SELCAL:</strong></label><br/>
+        <input
+          type="text"
+          id="selcalInput"
+          name="selcal"
+          placeholder="e.g., ABCD"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Type dropdown (FK to AircraftType) -->
       <div style="flex: 1 1 250px;">
         <label for="typeSelect"><strong>Aircraft Type:</strong></label><br/>
         <select id="typeSelect" name="aircraft_type_id" required style="width: 100%; padding: 8px;">
           <option value="">-- Select Type --</option>
-          <!-- Populated dynamically with /api/aircraft_type data -->
+          <!-- Populated dynamically with /api/aircraft_types -->
         </select>
       </div>
 
-      <!-- Airline dropdown -->
+      <!-- Airline dropdown (FK to Airline) -->
       <div style="flex: 1 1 250px;">
         <label for="airlineSelect"><strong>Airline:</strong></label><br/>
         <select id="airlineSelect" name="airline_id" required style="width: 100%; padding: 8px;">
           <option value="">-- Select Airline --</option>
-          <!-- Populated dynamically with /api/airlines data -->
+          <!-- Populated dynamically with /api/airlines -->
         </select>
+      </div>
+
+      <!-- Serial Number -->
+      <div style="flex: 1 1 250px;">
+        <label for="serialNumberInput"><strong>Serial Number:</strong></label><br/>
+        <input
+          type="text"
+          id="serialNumberInput"
+          name="serial_number"
+          placeholder="e.g., 12345"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Year Built -->
+      <div style="flex: 1 1 250px;">
+        <label for="yearBuiltInput"><strong>Year Built:</strong></label><br/>
+        <input
+          type="number"
+          id="yearBuiltInput"
+          name="year_built"
+          placeholder="e.g., 2020"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Status -->
+      <div style="flex: 1 1 250px;">
+        <label for="statusInput"><strong>Status:</strong></label><br/>
+        <input
+          type="text"
+          id="statusInput"
+          name="status"
+          placeholder="e.g., active, parked, scrapped"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Name (optional) -->
+      <div style="flex: 1 1 250px;">
+        <label for="nameInput"><strong>Name:</strong></label><br/>
+        <input
+          type="text"
+          id="nameInput"
+          name="name"
+          placeholder="e.g., 'Johann Viking'"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Construction Number -->
+      <div style="flex: 1 1 250px;">
+        <label for="constructionNumberInput"><strong>Construction #:</strong></label><br/>
+        <input
+          type="number"
+          id="constructionNumberInput"
+          name="construction_number"
+          placeholder="e.g., 123"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Test Registration -->
+      <div style="flex: 1 1 250px;">
+        <label for="testRegInput"><strong>Test Registration:</strong></label><br/>
+        <input
+          type="text"
+          id="testRegInput"
+          name="test_reg"
+          placeholder="e.g., F-WXYZ"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- Delivery Date -->
+      <div style="flex: 1 1 250px;">
+        <label for="deliveryDateInput"><strong>Delivery Date:</strong></label><br/>
+        <input
+          type="date"
+          id="deliveryDateInput"
+          name="delivery_date"
+          style="width: 100%; padding: 8px;"
+        />
+      </div>
+
+      <!-- remarks_json (text area) -->
+      <div style="flex: 1 1 250px;">
+        <label for="remarksInput"><strong>Remarks (JSON or text):</strong></label><br/>
+        <textarea
+          id="remarksInput"
+          name="remarks_json"
+          placeholder='e.g. ["Named \"Ingeborg Viking\"", "Extra note"]'
+          style="width: 100%; height: 80px; padding: 8px;"
+        ></textarea>
+      </div>
+
+      <!-- previous_reg_json (text area) -->
+      <div style="flex: 1 1 250px;">
+        <label for="previousRegInput"><strong>Previous Registration (JSON):</strong></label><br/>
+        <textarea
+          id="previousRegInput"
+          name="previous_reg_json"
+          placeholder='e.g. {"registration": "N123AB", "operator": "Some Operator"}'
+          style="width: 100%; height: 80px; padding: 8px;"
+        ></textarea>
       </div>
 
       <!-- Submit Button -->
