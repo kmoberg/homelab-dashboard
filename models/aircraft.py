@@ -26,6 +26,8 @@ class Aircraft(db.Model):
 
     # Relationships
     aircraft_type = db.relationship("AircraftType", backref="aircraft_list", lazy="joined")
+
+    # Backref to Airline using the operator_id FK
     operator = db.relationship("Airline", backref="aircraft_list", lazy="joined")
 
     def __init__(self, **kwargs):
